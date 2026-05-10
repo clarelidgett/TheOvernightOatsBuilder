@@ -1,0 +1,3932 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>The Overnight Oats Builder</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg:        #0E1F1C;
+    --card:      #173029;
+    --text:      #E8F1ED;
+    --muted:     #8FA8A2;
+    --soft:      #1F3A34;
+    --border:    #2A4A43;
+    --accent:    #5DBFA7;
+    --accent-2:  #7AD4BC;
+    --gold:      #E8B14C;
+    --warn:      #E0A158;
+    --ban-bg:    #3A2520;
+    --ban-fg:    #D89E8C;
+    --ban-border: #5C3A30;
+    --disabled-bg: #1F3A34;
+    --disabled-fg: #5E7570;
+    --backdrop:    rgba(5,15,13,0.72);
+    --warn-soft:   rgba(224,161,88,0.12);
+    --warn-soft-b: rgba(224,161,88,0.32);
+    --shadow-card: 0 4px 18px rgba(0,0,0,0.4);
+    --shadow-modal: 0 20px 60px rgba(0,0,0,0.55);
+    --shadow-toast: 0 8px 24px rgba(0,0,0,0.6);
+    --shadow-btn:   0 4px 14px rgba(42,111,96,0.35);
+    --disclaimer-bg: rgba(255,255,255,0.03);
+    --loved-bg:     rgba(232,177,76,0.18);
+  }
+  [data-theme="light"] .profile-bar select,
+  [data-theme="light"] .base-row select,
+  [data-theme="light"] .recipes-toolbar select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%235C7570' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+  }
+  [data-theme="light"] {
+    color-scheme: light;
+    --bg:        #EDF4F1;
+    --card:      #FFFFFF;
+    --text:      #1F3A36;
+    --muted:     #5C7570;
+    --soft:      #DCE9E4;
+    --border:    #C8D9D3;
+    --accent:    #2A6F60;
+    --accent-2:  #3D8B7A;
+    --gold:      #D49B3C;
+    --warn:      #B97A3A;
+    --ban-bg:    #F2DDD5;
+    --ban-fg:    #A87967;
+    --ban-border: #E8CFC5;
+    --disabled-bg: #DCE9E4;
+    --disabled-fg: #8FA39E;
+    --backdrop:    rgba(31,58,54,0.45);
+    --warn-soft:   #FBF3E5;
+    --warn-soft-b: #E8D9B5;
+    --shadow-card: 0 4px 18px rgba(31,58,54,0.06);
+    --shadow-modal: 0 20px 60px rgba(31,58,54,0.22);
+    --shadow-toast: 0 8px 24px rgba(31,58,54,0.32);
+    --shadow-btn:   0 4px 14px rgba(42,111,96,0.20);
+    --disclaimer-bg: rgba(255,255,255,0.5);
+    --loved-bg:     #F4E0B7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    font-size: 15px;
+    font-feature-settings: "ss01","cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 22px 80px; }
+
+  header.top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  h1 {
+    font-size: 26px; margin: 0 0 2px; font-weight: 600;
+    letter-spacing: -0.025em; color: var(--text);
+  }
+  .sub { color: var(--muted); font-size: 13px; margin: 0; letter-spacing: 0.005em; }
+
+  .mode-toggle {
+    display: inline-flex; background: var(--card); border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+  }
+  .mode-toggle button {
+    border: 0; background: transparent; padding: 7px 14px; font-size: 13px; font-weight: 500;
+    color: var(--muted); cursor: pointer; border-radius: 999px; font-family: inherit;
+    letter-spacing: -0.005em; transition: background 140ms, color 140ms;
+  }
+  .mode-toggle button.active { background: var(--accent); color: var(--bg); }
+
+  .theme-btn {
+    border: 1px solid var(--border); background: var(--card);
+    width: 36px; height: 36px; border-radius: 999px;
+    cursor: pointer; font-family: inherit; font-size: 15px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--muted); transition: all 140ms; line-height: 1;
+  }
+  .theme-btn:hover { color: var(--text); border-color: var(--accent); }
+  .header-controls { display: inline-flex; align-items: center; gap: 8px; }
+
+
+  /* Pantry */
+  .pantry-intro {
+    font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.5;
+  }
+  .pantry-section {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 14px;
+  }
+  .pantry-section .head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 12px; gap: 10px; flex-wrap: wrap;
+  }
+  .pantry-section h2 {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0; color: var(--muted);
+  }
+  .pantry-section .actions { display: inline-flex; gap: 6px; }
+  .pantry-section .actions button {
+    border: 1px solid var(--border); background: transparent; cursor: pointer;
+    padding: 5px 11px; border-radius: 6px; font-family: inherit; font-size: 12px;
+    color: var(--text); font-weight: 500;
+  }
+  .pantry-section .actions button:hover { border-color: var(--accent); color: var(--accent); }
+  .pantry-section .actions button.primary {
+    background: var(--accent); color: var(--bg); border-color: var(--accent);
+  }
+  .pantry-section .actions button.primary:hover { background: var(--accent-2); }
+
+  .pantry-count { font-size: 12px; color: var(--accent); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  .pantry-empty {
+    color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center; font-style: italic;
+  }
+
+  .suggestion-grid {
+    display: grid; gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+  .suggestion-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .suggestion-card .name {
+    font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.005em;
+  }
+  .suggestion-card .ings { font-size: 12px; color: var(--muted); line-height: 1.45; }
+  .suggestion-card .macros { font-size: 11px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .suggestion-card .row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .suggestion-card .row button {
+    border: 1px solid var(--border); background: var(--card); cursor: pointer;
+    padding: 5px 11px; border-radius: 6px; font-family: inherit; font-size: 12px;
+    color: var(--text); font-weight: 500;
+  }
+  .suggestion-card .row button:hover { border-color: var(--accent); }
+  .suggestion-card .row button.primary {
+    background: var(--accent); color: var(--bg); border-color: var(--accent);
+  }
+  .suggestion-card .row button.primary:hover { background: var(--accent-2); }
+
+
+  /* Shopping list tab */
+  .shop-toolbar {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    padding: 12px 18px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; margin-bottom: 14px;
+  }
+  .shop-toolbar .meta { font-size: 12px; color: var(--muted); flex: 1; min-width: 200px; }
+  .shop-toolbar button {
+    border: 1px solid var(--border); background: transparent; cursor: pointer;
+    padding: 6px 12px; border-radius: 6px; font-family: inherit; font-size: 12px;
+    color: var(--text); font-weight: 500;
+  }
+  .shop-toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+  .shop-toolbar button.danger { color: var(--ban-fg); }
+  .shop-toolbar button.danger:hover { border-color: var(--ban-fg); color: var(--ban-fg); }
+
+  .shop-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .shop-group { margin-bottom: 14px; }
+  .shop-group:last-child { margin-bottom: 0; }
+  .shop-group h3 {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent); margin: 0 0 8px;
+  }
+  .shop-list { list-style: none; padding: 0; margin: 0; }
+  .shop-item {
+    display: flex; align-items: center; gap: 10px; padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .shop-item:last-child { border-bottom: 0; }
+  .shop-item .check {
+    width: 18px; height: 18px; border: 1.5px solid var(--border); border-radius: 4px;
+    cursor: pointer; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; color: var(--accent); transition: all 140ms;
+  }
+  .shop-item .check:hover { border-color: var(--accent); }
+  .shop-item.ticked .check { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .shop-item.ticked .name { text-decoration: line-through; color: var(--muted); }
+  .shop-item .name { font-size: 13px; flex: 1; color: var(--text); }
+  .shop-item .qty { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .shop-item .have { font-size: 11px; color: var(--accent); font-weight: 500; padding: 2px 6px; background: var(--soft); border-radius: 4px; margin-right: 6px; }
+  .shop-item .src { font-size: 10px; color: var(--muted); padding: 1px 5px; background: var(--soft); border-radius: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .shop-item .remove { border: 0; background: transparent; cursor: pointer; color: var(--muted); padding: 2px 6px; font-size: 14px; line-height: 1; }
+  .shop-item .remove:hover { color: var(--ban-fg); }
+
+  .shop-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 40px 20px; font-style: italic; }
+
+  /* Mode toggle is only meaningful in the Builder tab */
+  body:not([data-active-tab="builder"]) .mode-toggle { display: none; }
+
+  /* Profile bar */
+  .profile-bar {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 18px; margin-bottom: 12px;
+    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  }
+  .profile-bar .label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .profile-bar select {
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    padding: 7px 12px; border-radius: 8px; font-family: inherit; font-size: 13px;
+    font-weight: 500; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%238FA8A2' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 10px center;
+    padding-right: 28px;
+  }
+  .toggle-switch {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+    font-size: 13px; color: var(--text);
+  }
+  .toggle-switch input { position: absolute; opacity: 0; pointer-events: none; }
+  .toggle-switch .track {
+    width: 34px; height: 20px; border-radius: 999px; background: var(--soft);
+    position: relative; transition: background 160ms;
+  }
+  .toggle-switch .track::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--card);
+    box-shadow: 0 1px 2px rgba(31,58,54,0.18);
+    transition: transform 160ms;
+  }
+  .toggle-switch input:checked + .track { background: var(--accent); }
+  .toggle-switch input:checked + .track::after { transform: translateX(14px); }
+
+  .restr-row {
+    display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+  }
+  .restr-row .label { margin-right: 2px; }
+  .restr-chip {
+    display: inline-flex; gap: 5px; align-items: center;
+    padding: 5px 11px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg);
+    font-size: 12px; color: var(--muted); user-select: none;
+    font-weight: 500; transition: all 140ms; line-height: 1;
+  }
+  .restr-chip:hover { border-color: var(--accent-2); }
+  .restr-chip.active {
+    background: var(--text); color: var(--bg); border-color: var(--text);
+  }
+
+  /* Tab nav */
+  .tab-nav {
+    display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 20; padding-top: 6px;
+  }
+  .tab-nav button {
+    border: 0; background: transparent; padding: 10px 16px; font-family: inherit;
+    font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    letter-spacing: -0.005em; transition: color 140ms, border-color 140ms;
+  }
+  .tab-nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-nav button:hover:not(.active) { color: var(--text); }
+  .tab-nav .count {
+    display: inline-block; background: var(--soft); color: var(--accent);
+    padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 600;
+    margin-left: 6px; font-variant-numeric: tabular-nums;
+  }
+  .tab-nav button.active .count { background: var(--accent); color: var(--bg); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* Quick load */
+  .quickload {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 14px;
+  }
+  .quickload h2 {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0 0 10px; color: var(--muted);
+  }
+  .quickload .tiles {
+    display: grid; gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  .quickload .tile {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; cursor: pointer; text-align: left;
+    transition: all 140ms; font-family: inherit;
+  }
+  .quickload .tile:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .quickload .tile .name {
+    font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px;
+    letter-spacing: -0.005em; line-height: 1.3;
+  }
+  .quickload .tile .meta {
+    font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px;
+  }
+  .quickload .tile .rating-emoji { font-size: 14px; }
+  .quickload .empty {
+    color: var(--muted); font-size: 13px; font-style: italic;
+  }
+
+  /* My recipes list */
+  .recipe-row {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 18px; margin-bottom: 10px; display: flex; gap: 14px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .recipe-row .info { flex: 1; min-width: 200px; }
+  .recipe-row .name {
+    font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px;
+    letter-spacing: -0.005em;
+  }
+  .recipe-row .summary { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .recipe-row .badges { display: inline-flex; gap: 6px; margin-left: 8px; flex-wrap: wrap; }
+  .recipe-row .badge {
+    font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
+    background: var(--soft); color: var(--accent); padding: 2px 7px; border-radius: 4px;
+  }
+  .recipe-row .rating-group { display: inline-flex; gap: 4px; }
+  .rate-btn {
+    border: 1px solid var(--border); background: var(--bg); cursor: pointer;
+    padding: 5px 9px; border-radius: 6px; font-family: inherit; font-size: 12px;
+    color: var(--muted); transition: all 140ms; line-height: 1;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .rate-btn:hover { border-color: var(--accent); }
+  .rate-btn.active.loved { background: var(--loved-bg); color: var(--gold); border-color: var(--gold); }
+  .rate-btn.active.fine  { background: var(--soft); color: var(--text); border-color: var(--accent); }
+  .rate-btn.active.skip  { background: var(--ban-bg); color: var(--ban-fg); border-color: var(--ban-fg); }
+  .recipe-row .actions-inline { display: inline-flex; gap: 6px; }
+  .recipe-row .actions-inline button {
+    border: 1px solid var(--border); background: var(--card); cursor: pointer;
+    padding: 6px 10px; border-radius: 6px; font-family: inherit; font-size: 12px;
+    color: var(--text); transition: all 140ms;
+  }
+  .recipe-row .actions-inline button:hover { border-color: var(--accent); }
+  .recipe-row .actions-inline button.danger { color: #B5867A; }
+  .recipe-row .actions-inline button.danger:hover { border-color: #B5867A; color: #8A4337; }
+
+  .empty-recipes {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .empty-recipes h3 { font-size: 16px; font-weight: 600; color: var(--text); margin: 0 0 6px; }
+  .empty-recipes p { margin: 0; font-size: 13px; }
+
+  /* Inspiration */
+  .insp-intro {
+    font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.5;
+  }
+  .insp-grid {
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .insp-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; display: flex; flex-direction: column; gap: 8px;
+    transition: all 140ms;
+  }
+  .insp-card.matched { border-color: var(--accent); }
+  .insp-card .name {
+    font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.005em; line-height: 1.3;
+  }
+  .insp-card .desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .insp-card .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .insp-card .tag {
+    font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
+    background: var(--soft); color: var(--muted); padding: 2px 7px; border-radius: 4px;
+  }
+  .insp-card .tag.match { background: var(--accent); color: var(--bg); }
+  .insp-card .ings { font-size: 12px; color: var(--text); line-height: 1.5; }
+  .insp-card .ings strong { color: var(--accent); font-weight: 600; }
+  .insp-card .note {
+    font-size: 11.5px; color: var(--muted); font-style: italic;
+    padding: 6px 10px; background: var(--soft); border-radius: 6px; line-height: 1.45;
+  }
+  .insp-card .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .insp-card .row button {
+    border: 1px solid var(--border); background: var(--card); cursor: pointer;
+    padding: 6px 12px; border-radius: 6px; font-family: inherit; font-size: 12px;
+    color: var(--text); transition: all 140ms; font-weight: 500;
+  }
+  .insp-card .row button:hover { border-color: var(--accent); }
+  .insp-card .row button.primary {
+    background: var(--accent); color: var(--bg); border-color: var(--accent);
+  }
+  .insp-card .row button.primary:hover { background: var(--accent-2); }
+
+  /* Weekly menu */
+  .weekly-toolbar {
+    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 14px; padding: 14px 18px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  }
+  .weekly-toolbar .meta-line {
+    font-size: 12px; color: var(--muted); flex: 1; min-width: 160px;
+  }
+  .weekly-toolbar .meta-line strong { color: var(--text); }
+  .weekly-status {
+    background: var(--soft); border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 6px; font-size: 13px; color: var(--text);
+    margin-bottom: 12px;
+  }
+  .day-grid {
+    display: grid; gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    margin-bottom: 18px;
+  }
+  .day-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; cursor: pointer; transition: all 140ms;
+    text-align: left; font-family: inherit; color: var(--text);
+  }
+  .day-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .day-card .day { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 4px; }
+  .day-card .name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; letter-spacing: -0.005em; line-height: 1.3; }
+  .day-card .ings { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
+  .day-card .badge-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 11px; }
+  .day-card .src-saved { color: var(--gold); }
+  .day-card .src-fresh { color: var(--accent); }
+  .day-card .macros-mini { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .shopping-list {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .shopping-list h2 {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0 0 14px; color: var(--muted);
+  }
+  .shopping-list .group { margin-bottom: 14px; }
+  .shopping-list .group:last-child { margin-bottom: 0; }
+  .shopping-list .group h3 {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent); margin: 0 0 6px;
+  }
+  .shopping-list ul { list-style: none; padding: 0; margin: 0; columns: 2; column-gap: 24px; }
+  .shopping-list li { padding: 3px 0; font-size: 13px; break-inside: avoid; line-height: 1.4; }
+  .shopping-list li .count { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+  /* Soft warning banner */
+  .soft-warning {
+    background: var(--warn-soft); border: 1px solid var(--warn-soft-b);
+    border-left: 3px solid var(--warn);
+    border-radius: 6px; padding: 8px 14px; font-size: 12px; color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  /* Servings adjuster */
+  .servings {
+    display: inline-flex; align-items: center; gap: 0; background: var(--soft);
+    border-radius: 8px; padding: 2px;
+  }
+  .servings button {
+    border: 0; background: transparent; cursor: pointer; padding: 4px 10px;
+    color: var(--text); font-size: 14px; font-weight: 600; font-family: inherit;
+    border-radius: 6px; line-height: 1;
+  }
+  .servings button:hover { background: var(--card); }
+  .servings .v {
+    padding: 4px 6px; font-size: 13px; font-weight: 600; color: var(--text);
+    font-variant-numeric: tabular-nums; min-width: 24px; text-align: center;
+  }
+  .servings .label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+    margin-right: 2px; font-weight: 600;
+  }
+
+  /* Macro target hint */
+  .macro-bar .target {
+    font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums;
+    margin-top: 1px; line-height: 1.1;
+  }
+  .macro-bar .target.met { color: var(--accent); }
+  .macro-bar .target.met::before { content: "✓ "; }
+  .macro-bar .pri-block, .macro-bar .sec-block {
+    display: flex; flex-direction: column; align-items: flex-start;
+  }
+
+  /* Sort/filter bar */
+  .recipes-toolbar {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 12px; padding: 12px 16px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .recipes-toolbar .label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .recipes-toolbar select {
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    padding: 5px 10px; border-radius: 6px; font-family: inherit; font-size: 12px;
+    font-weight: 500; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%238FA8A2' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 8px center;
+    padding-right: 24px;
+  }
+  .recipes-toolbar .filter-chip {
+    border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+    padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 500;
+    cursor: pointer; font-family: inherit; line-height: 1.4;
+  }
+  .recipes-toolbar .filter-chip.active {
+    background: var(--text); color: var(--bg); border-color: var(--text);
+  }
+
+  /* Recipe notes */
+  .recipe-row .notes-row {
+    flex-basis: 100%; margin-top: 8px; padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+  .recipe-row .notes-input {
+    width: 100%; border: 0; background: transparent; resize: none;
+    font-family: inherit; font-size: 12px; color: var(--text); line-height: 1.4;
+    padding: 4px 0; outline: none; min-height: 22px;
+  }
+  .recipe-row .notes-input::placeholder { color: var(--muted); font-style: italic; }
+  .recipe-row .notes-row .label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); font-weight: 600; margin-right: 6px;
+  }
+
+  /* Sticky macro bar */
+  .macro-bar {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 22px; margin-bottom: 14px;
+    display: flex; gap: 22px; align-items: center; flex-wrap: wrap;
+    position: sticky; top: 56px; z-index: 10;
+    box-shadow: var(--shadow-card);
+  }
+  .macro-bar .pri { display: flex; gap: 10px; align-items: baseline; }
+  .macro-bar .pri .v {
+    font-size: 30px; font-weight: 600; color: var(--text); line-height: 1;
+    letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
+  }
+  .macro-bar .pri .u {
+    font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .macro-bar .sep { width: 1px; height: 32px; background: var(--border); }
+  .macro-bar .sec { display: flex; gap: 4px; align-items: baseline; }
+  .macro-bar .sec .v {
+    font-size: 16px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
+  }
+  .macro-bar .sec .u {
+    font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  .grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) 320px; }
+  @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 22px;
+  }
+  .panel + .panel { margin-top: 14px; }
+  .panel h2 {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0 0 12px; color: var(--muted);
+  }
+  .base-row { display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: var(--text); }
+  .base-row .row { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+  .base-row .qty { font-weight: 600; color: var(--text); min-width: 56px; }
+  .base-row .name { color: var(--text); }
+  .base-row .desc { font-size: 12px; color: var(--muted); flex-basis: 100%; padding-left: 60px; line-height: 1.45; margin-top: -2px; }
+  @media (max-width: 600px) { .base-row .desc { padding-left: 0; } }
+  .base-row .label-strong { font-weight: 600; color: var(--text); }
+  .base-row select {
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    padding: 5px 10px; border-radius: 6px; font-family: inherit; font-size: 13px;
+    font-weight: 500; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%238FA8A2' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 8px center;
+    padding-right: 26px;
+  }
+
+  .cat { margin-bottom: 14px; }
+  .cat-head {
+    display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;
+  }
+  .cat-name {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    padding: 7px 12px; border-radius: 999px; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 140ms; user-select: none;
+    display: inline-flex; align-items: center; gap: 6px; line-height: 1;
+    letter-spacing: -0.005em;
+  }
+  .chip:hover { border-color: var(--accent-2); }
+  .chip.selected {
+    background: var(--accent); color: var(--bg); border-color: var(--accent);
+  }
+  .chip.selected:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  .chip.loved::before { content: "♥"; color: var(--accent); font-size: 11px; }
+  .chip.selected.loved::before { color: var(--gold); }
+  .chip.recommended::before { content: "★"; color: var(--gold); font-size: 12px; }
+  .chip.selected.recommended::before { color: var(--gold); }
+  .chip.recommended.loved::before { content: "★ ♥"; color: var(--gold); }
+
+  /* Best-combo clash */
+  .chip.clash {
+    background: var(--disabled-bg); color: var(--disabled-fg); border-color: var(--border);
+    cursor: not-allowed;
+    text-decoration: line-through; text-decoration-color: rgba(143,163,158,0.6);
+  }
+  /* Profile-banned (hard) */
+  .chip.banned {
+    background: var(--ban-bg); color: var(--ban-fg); border-color: var(--ban-border);
+    cursor: not-allowed;
+    text-decoration: line-through; text-decoration-color: rgba(168,121,103,0.6);
+  }
+  .chip.banned::after { content: "✕"; font-size: 10px; margin-left: 4px; opacity: 0.7; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 14px; font-size: 11px; color: var(--muted);
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend .heart { color: var(--accent); }
+  .legend .star { color: var(--gold); }
+  .legend .ban { color: var(--ban-fg); }
+
+  /* Benefits sidebar */
+  .sidebar { position: sticky; top: 116px; align-self: flex-start; }
+  .benefits-panel {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px; max-height: calc(100vh - 140px); overflow-y: auto;
+  }
+  .benefits-panel h2 {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0 0 12px; color: var(--muted);
+  }
+  .benefit-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .benefit-item:last-child { border-bottom: 0; }
+  .benefit-item .name {
+    font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.005em;
+    margin-bottom: 2px;
+  }
+  .benefit-item .why { font-size: 12px; color: var(--muted); line-height: 1.45; }
+  .benefit-item .qty {
+    font-size: 11px; color: var(--accent); font-weight: 500; margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .empty-benefits {
+    color: var(--muted); font-size: 12.5px; padding: 6px 2px; line-height: 1.5;
+    font-style: italic;
+  }
+
+  /* Toast */
+  .toast-wrap {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    z-index: 100; pointer-events: none;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast {
+    background: var(--card); color: var(--text); border: 1px solid var(--border);
+    padding: 10px 16px; border-radius: 8px; font-size: 13px;
+    box-shadow: var(--shadow-toast);
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 200ms, transform 200ms;
+    max-width: 460px;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast strong { color: var(--gold); font-weight: 600; }
+
+  .actions {
+    position: sticky; bottom: 14px; display: flex; gap: 10px; justify-content: flex-end;
+    margin-top: 18px;
+  }
+  .btn {
+    border: 1px solid var(--accent); background: var(--accent); color: var(--bg);
+    padding: 10px 18px; font-size: 14px; font-weight: 500; border-radius: 8px; cursor: pointer;
+    font-family: inherit; transition: background 140ms;
+    box-shadow: var(--shadow-btn);
+    letter-spacing: -0.005em;
+  }
+  .btn:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  .btn.ghost {
+    background: var(--card); color: var(--accent);
+    border: 1px solid var(--border); box-shadow: none;
+  }
+  .btn.ghost:hover { background: var(--soft); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .disclaimer {
+    font-size: 11px; color: var(--muted); line-height: 1.5; margin-top: 18px;
+    padding: 12px 16px; background: var(--disclaimer-bg); border-radius: 8px;
+    border: 1px dashed var(--border);
+  }
+  .disclaimer strong { color: var(--text); }
+
+  /* Recipe card modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: var(--backdrop); display: none;
+    align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto;
+    z-index: 50;
+  }
+  .modal-bg.open { display: flex; }
+  .recipe-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    width: 100%; max-width: 720px; padding: 32px 36px; position: relative;
+    box-shadow: var(--shadow-modal);
+  }
+  .recipe-card h3 {
+    font-size: 26px; margin: 0 0 4px; font-weight: 600; letter-spacing: -0.025em;
+  }
+  .recipe-card .meta {
+    font-size: 11px; color: var(--muted); margin-bottom: 22px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .recipe-card h4 {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent); margin: 22px 0 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .recipe-card ul.ing { list-style: none; padding: 0; margin: 0; columns: 2; column-gap: 28px; }
+  .recipe-card ul.ing li { padding: 4px 0; font-size: 14px; break-inside: avoid; }
+  .recipe-card ul.ing li .q { color: var(--muted); font-size: 13px; }
+  .recipe-card ol.steps { padding-left: 18px; margin: 0; }
+  .recipe-card ol.steps li { padding: 4px 0; font-size: 14px; }
+  .recipe-card .macros {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 8px;
+  }
+  .recipe-card .macro {
+    background: var(--soft); border-radius: 8px; padding: 10px; text-align: center;
+  }
+  .recipe-card .macro .v {
+    font-size: 18px; font-weight: 600; color: var(--text); display: block;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+  }
+  .recipe-card .macro .l {
+    font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .recipe-card .pairing {
+    background: var(--soft); border-left: 3px solid var(--accent); padding: 10px 14px;
+    border-radius: 4px; font-size: 13px; color: var(--text); margin: 8px 0;
+  }
+  .recipe-card .pairing.warn {
+    border-left-color: var(--warn); background: var(--warn-soft);
+  }
+  .recipe-card .close {
+    position: absolute; top: 14px; right: 14px; border: 0; background: transparent;
+    font-size: 22px; color: var(--muted); cursor: pointer; line-height: 1;
+  }
+  .recipe-card .row {
+    display: flex; gap: 8px; justify-content: flex-end; margin-top: 22px;
+  }
+
+  @media (max-width: 720px) {
+    .wrap { padding: 16px 14px 60px; }
+    h1 { font-size: 22px; }
+    .sub { font-size: 12px; }
+    header.top { gap: 10px; margin-bottom: 12px; }
+
+    .profile-bar { padding: 10px 14px; gap: 10px; }
+    .profile-bar select { font-size: 13px; padding: 6px 24px 6px 10px; }
+    .profile-bar #profile-note { display: none; }
+
+    .restr-row { gap: 5px; }
+    .restr-chip { font-size: 11px; padding: 4px 9px; }
+
+    .macro-bar { gap: 10px 14px; padding: 12px 14px; }
+    .macro-bar .pri .v { font-size: 22px; }
+    .macro-bar .pri .u, .macro-bar .sec .u, .macro-bar .target { font-size: 10px; }
+    .macro-bar .sec .v { font-size: 14px; }
+    .macro-bar .sep { display: none; }
+    .servings { margin-left: auto; }
+
+    .panel { padding: 14px 16px; }
+    .panel h2 { margin-bottom: 10px; }
+    .base-row { gap: 8px 14px; font-size: 13px; }
+    .base-row select { font-size: 13px; padding: 4px 22px 4px 8px; }
+
+    .chip { font-size: 13px; padding: 8px 12px; min-height: 32px; }
+    .chips { gap: 6px; }
+
+    .quickload { padding: 14px 16px; }
+    .quickload .tiles { grid-template-columns: 1fr 1fr; }
+
+    .sidebar { position: static; }
+    .benefits-panel { max-height: none; padding: 14px 16px; }
+
+    .actions { bottom: 10px; }
+    .btn { padding: 9px 16px; font-size: 13px; }
+
+    .recipe-card { padding: 24px 20px; }
+    .recipe-card h3 { font-size: 22px; }
+    .recipe-card ul.ing { columns: 1; }
+    .recipe-card .macros { grid-template-columns: repeat(3, 1fr); }
+    .recipe-card .row { flex-wrap: wrap; }
+
+    .recipe-row { gap: 10px; padding: 12px 14px; }
+    .recipe-row .info { flex-basis: 100%; min-width: 0; }
+    .recipe-row .name { font-size: 14px; }
+    .recipe-row .badges { display: block; margin-left: 0; margin-top: 4px; }
+    .rate-btn { font-size: 11px; padding: 5px 8px; }
+    .recipe-row .actions-inline { margin-left: auto; }
+
+    .tab-nav { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+    .tab-nav::-webkit-scrollbar { height: 3px; }
+    .tab-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .tab-nav button { flex-shrink: 0; white-space: nowrap; padding: 10px 12px; font-size: 13px; }
+    .tab-nav .count { display: inline-block; padding: 1px 5px; font-size: 10px; }
+    .recipes-toolbar { padding: 10px 12px; gap: 6px 8px; }
+    .recipes-toolbar .label { font-size: 10px; }
+    .recipes-toolbar select { font-size: 12px; padding: 4px 22px 4px 8px; }
+
+    /* Prevent iOS zoom on focus */
+    .recipe-row .notes-input,
+    #name-input { font-size: 16px; }
+  }
+  @media (max-width: 420px) {
+    .quickload .tiles { grid-template-columns: 1fr; }
+    .recipe-card .macros { grid-template-columns: repeat(2, 1fr); }
+    .servings .label { display: none; }
+  }
+  @media print {
+    body { background: #fff; }
+    .wrap, header.top, .panel, .actions, .macro-bar, .sidebar, .profile-bar, .disclaimer { display: none !important; }
+    .modal-bg { position: static; padding: 0; background: #fff; display: block !important; }
+    .recipe-card { box-shadow: none; border: 0; max-width: 100%; }
+    .recipe-card .close, .recipe-card .row { display: none !important; }
+  }
+</style>
+</head>
+<body data-active-tab="builder">
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>The Overnight Oats Builder</h1>
+      <p class="sub">Pick a profile, build your jar, see the macros and benefits live.</p>
+    </div>
+    <div class="header-controls">
+      <div class="mode-toggle" role="tablist" aria-label="Mode">
+        <button id="mode-freestyle" class="active" data-mode="freestyle">Freestyle</button>
+        <button id="mode-best" data-mode="best">Best Combo</button>
+      </div>
+      <button id="customize-btn" class="theme-btn" aria-label="Customise preferences" title="Customise" style="width:auto; padding:0 14px; gap:6px; font-size:13px; font-weight:500; color:var(--accent); border-color:var(--accent);">⚙ Customise</button>
+      <button id="help-btn" class="theme-btn" aria-label="Help" title="Help">?</button>
+      <button id="theme-btn" class="theme-btn" aria-label="Toggle light/dark mode" title="Toggle theme">☀</button>
+    </div>
+  </header>
+
+  <div class="profile-bar">
+    <span class="label">Profile</span>
+    <select id="profile-select">
+      <option value="regular">Regular</option>
+      <optgroup label="Life stage">
+        <option value="pregnant">Pregnant</option>
+        <option value="postpartum">Postpartum / Breastfeeding</option>
+        <option value="perimenopausal">Perimenopausal</option>
+        <option value="menopausal">Menopausal</option>
+        <option value="ageing">Healthy ageing 60+</option>
+      </optgroup>
+      <optgroup label="Performance">
+        <option value="athletic">Athletic / training</option>
+        <option value="muscle">Muscle building</option>
+      </optgroup>
+      <optgroup label="Health goals">
+        <option value="weightloss">Weight loss</option>
+        <option value="bloodsugar">Diabetes / blood-sugar</option>
+        <option value="antiinflam">Anti-inflammatory</option>
+      </optgroup>
+    </select>
+    <label class="toggle-switch">
+      <input type="checkbox" id="plant-based-toggle" />
+      <span class="track"></span>
+      <span>Plant-based</span>
+    </label>
+    <label class="toggle-switch">
+      <input type="checkbox" id="gluten-free-toggle" />
+      <span class="track"></span>
+      <span>Gluten-free</span>
+    </label>
+    <span class="units-toggle" style="display:inline-flex; align-items:center; gap: 6px;">
+      <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);">Units</span>
+      <span style="display:inline-flex; gap: 2px; background: var(--soft); padding: 3px; border-radius: 8px;">
+        <button id="units-imp" data-units="imperial" style="border:0; background: var(--card); color: var(--text); padding: 5px 12px; font-size: 12px; font-family: inherit; font-weight: 600; cursor: pointer; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">cups</button>
+        <button id="units-met" data-units="metric" style="border:0; background: transparent; color: var(--muted); padding: 5px 12px; font-size: 12px; font-family: inherit; font-weight: 500; cursor: pointer; border-radius: 6px;">g / ml</button>
+      </span>
+    </span>
+    <span style="flex: 1; min-width: 8px"></span>
+    <span id="profile-note" style="font-size: 11px; color: var(--muted); font-style: italic;"></span>
+    <span id="profile-caution" style="font-size: 11px; color: var(--warn); font-style: italic; flex-basis: 100%; margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--border); display: none;"></span>
+  </div>
+
+  <div class="tab-nav">
+    <button id="tab-builder-btn" class="active" data-tab="builder">Builder</button>
+    <button id="tab-inspiration-btn" data-tab="inspiration">Inspiration</button>
+    <button id="tab-pantry-btn" data-tab="pantry">Pantry</button>
+    <button id="tab-recipes-btn" data-tab="recipes">My Recipes <span class="count" id="recipes-count">0</span></button>
+    <button id="tab-weekly-btn" data-tab="weekly">Weekly Menu</button>
+    <button id="tab-shopping-btn" data-tab="shopping">Shopping <span class="count" id="shopping-count">0</span></button>
+  </div>
+
+  <div class="tab-pane active" id="tab-builder">
+
+  <div class="profile-bar">
+    <div class="restr-row">
+      <span class="label">Allergies / intolerances</span>
+      <button class="restr-chip" data-restr="nuts" title="Bans all tree nuts and peanut butter">Nuts</button>
+      <button class="restr-chip" data-restr="sesame">Sesame</button>
+      <button class="restr-chip" data-restr="soy">Soy</button>
+    </div>
+  </div>
+
+  <div id="soft-warning-slot"></div>
+
+  <div class="quickload" id="quickload" style="display:none">
+    <h2>Quick open — your favourites</h2>
+    <div class="tiles" id="quickload-tiles"></div>
+  </div>
+
+  <div class="macro-bar" id="macro-bar">
+    <div class="pri-block">
+      <div class="pri"><span class="v" id="m-kcal">0</span><span class="u">kcal</span></div>
+      <div class="target" id="t-kcal"></div>
+    </div>
+    <div class="sep"></div>
+    <div class="sec-block">
+      <div class="sec"><span class="v" id="m-prot">0</span><span class="u">g protein</span></div>
+      <div class="target" id="t-prot"></div>
+    </div>
+    <div class="sec-block">
+      <div class="sec"><span class="v" id="m-fat">0</span><span class="u">g fat</span></div>
+      <div class="target" id="t-fat"></div>
+    </div>
+    <div class="sec-block">
+      <div class="sec"><span class="v" id="m-carb">0</span><span class="u">g carbs</span></div>
+      <div class="target" id="t-carb"></div>
+    </div>
+    <div class="sec-block">
+      <div class="sec"><span class="v" id="m-fib">0</span><span class="u">g fibre</span></div>
+      <div class="target" id="t-fib"></div>
+    </div>
+    <span style="flex: 1; min-width: 4px"></span>
+    <div class="servings">
+      <span class="label">Servings</span>
+      <button id="srv-minus" aria-label="Decrease servings">−</button>
+      <span class="v" id="srv-v">1</span>
+      <button id="srv-plus" aria-label="Increase servings">+</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <section class="panel">
+        <h2>Base</h2>
+        <div class="base-row">
+          <div class="row">
+            <span class="qty">½ cup</span><span class="name">rolled oats</span>
+            <span class="desc">Beta-glucan fibre, slow-release energy. Always included.</span>
+          </div>
+          <div class="row">
+            <span class="qty" id="milk-qty">⅔ cup</span>
+            <select id="milk-select"></select>
+            <span class="desc">Liquid base. Full-fat dairy = richest, soy = highest plant protein, oat = sweetest, coconut = APAC default. None for thick oats.</span>
+          </div>
+          <div class="row">
+            <span class="qty" id="yogurt-qty">¼ cup</span>
+            <select id="yogurt-select"></select>
+            <span class="desc">Adds protein and creaminess. Skyr is densest protein, cottage cheese is slow-release, plant options when dairy-free.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+          <h2 style="margin:0;">Toppings &amp; mix-ins</h2>
+          <div style="display:inline-flex; gap:6px;">
+            <button id="surprise-btn" style="border:1px solid var(--border); background:transparent; color:var(--accent); font-family:inherit; font-size:12px; cursor:pointer; padding:5px 11px; border-radius:6px;">🎲 Surprise me</button>
+            <button id="reset-btn" style="border:0; background:transparent; color:var(--muted); font-family:inherit; font-size:12px; cursor:pointer; padding:5px 8px; border-radius:6px;">Reset toppings</button>
+          </div>
+        </div>
+        <div class="legend" style="margin-top:0; padding-top:0; border-top:0; margin-bottom:14px;">
+          <span><span class="star">★</span> recommended for your profile</span>
+          <span><span class="heart">♥</span> signature pairing</span>
+          <span><span class="ban">✕</span> not recommended for your profile</span>
+          <span style="text-decoration: line-through; color: var(--disabled-fg);">flavour clash (Best Combo)</span>
+        </div>
+        <div id="categories"></div>
+      </section>
+    </div>
+
+    <aside class="sidebar">
+      <div class="benefits-panel">
+        <h2>Why these work for you</h2>
+        <div id="benefits-list"></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="actions">
+    <button class="btn ghost" id="clear-btn">Clear all</button>
+    <button class="btn" id="recipe-btn">Generate recipe card</button>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠ General nutrition guidance only — not medical advice.</strong> Profile recommendations and exclusions are based on mainstream nutrition principles. If you are pregnant, breastfeeding, managing diabetes or any medical condition, or taking medication, please consult your healthcare provider before changing your diet. This tool does not diagnose, treat, prevent, or cure any condition.
+  </div>
+
+  </div><!-- /#tab-builder -->
+
+  <div class="tab-pane" id="tab-weekly">
+    <div class="weekly-toolbar">
+      <button class="btn" id="generate-week-btn">Generate weekly menu</button>
+      <button id="weekly-reset-btn" style="border:1px solid var(--border); background:transparent; color:var(--ban-fg); font-family:inherit; font-size:12px; cursor:pointer; padding:6px 12px; border-radius:6px;">Clear menu</button>
+      <div class="meta-line">Profile: <strong id="weekly-profile-label">Regular</strong> · uses your saved Loved + Fine first, fills the rest using profile recommendations</div>
+    </div>
+    <div id="weekly-status"></div>
+    <div class="day-grid" id="day-grid"></div>
+    <div class="shopping-list" id="shopping-list" style="display:none">
+      <h2>Shopping list</h2>
+      <div id="shopping-content"></div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="tab-inspiration">
+    <p class="insp-intro">Tried-and-tested combos to start from. Cards highlighted in teal match your current profile (<strong id="insp-profile-label">Regular</strong>). Tap <em>Open</em> to load it into the Builder, or <em>Save</em> to add it to My Recipes as-is.</p>
+    <div class="insp-grid" id="insp-grid"></div>
+  </div>
+
+  <div class="tab-pane" id="tab-shopping">
+    <div class="shop-toolbar">
+      <div class="meta">Auto-populated from your weekly menu, plus anything you add from the Builder or Inspiration. Items in your <strong>Pantry</strong> show as "have" so you don't double-buy.</div>
+      <button id="shop-sync-week-btn">Re-sync from Weekly Menu</button>
+      <button id="shop-clear-ticked-btn">Clear ticked</button>
+      <button class="danger" id="shop-clear-all-btn">Clear all</button>
+    </div>
+    <div class="shop-section" id="shop-content">
+      <div class="shop-empty">Your shopping list is empty. Generate a Weekly Menu, or add items from the Builder/Inspiration cards.</div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="tab-pantry">
+    <p class="pantry-intro">Tell us what you have on hand and we'll generate combos that work — using only your pantry, biased toward signature pairings, profile-aware, no clashes.</p>
+
+    <div class="pantry-section">
+      <div class="head">
+        <h2>Your pantry <span class="pantry-count" id="pantry-count">0 items</span></h2>
+        <div class="actions">
+          <button id="pantry-clear-btn">Clear pantry</button>
+          <button id="pantry-suggest-btn" class="primary">Generate suggestions</button>
+        </div>
+      </div>
+      <div id="pantry-grid"></div>
+    </div>
+
+    <div class="pantry-section">
+      <div class="head">
+        <h2>Suggested combos</h2>
+      </div>
+      <div id="suggestion-output"></div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="tab-recipes">
+    <div class="recipes-toolbar" id="recipes-toolbar" style="display:none">
+      <button id="recipes-reset-btn" style="border:1px solid var(--border); background:transparent; color:var(--ban-fg); font-family:inherit; font-size:11px; cursor:pointer; padding:4px 10px; border-radius:6px; margin-right:6px;">Clear all recipes</button>
+      <span class="label">Sort</span>
+      <select id="recipes-sort">
+        <option value="rating">Rating &amp; date</option>
+        <option value="date">Date saved</option>
+        <option value="profile">Profile</option>
+        <option value="name">Name</option>
+      </select>
+      <span style="width:10px"></span>
+      <span class="label">Filter</span>
+      <span id="recipes-filter-chips"></span>
+    </div>
+    <div id="recipes-list"></div>
+  </div>
+
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<div class="modal-bg" id="name-modal" aria-hidden="true">
+  <div class="recipe-card" role="dialog" aria-modal="true" aria-labelledby="nm-title" style="max-width: 460px; padding: 28px 32px;">
+    <button class="close" id="name-close" aria-label="Close">×</button>
+    <h3 id="nm-title" style="font-size: 20px; margin-bottom: 6px;">Name this recipe</h3>
+    <p style="font-size: 13px; color: var(--muted); margin: 0 0 16px;">Saved to your browser. You can rename or delete from My Recipes.</p>
+    <input id="name-input" type="text" placeholder="e.g. PB + Banana + Cinnamon"
+      style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; background: var(--bg); color: var(--text); outline: none; transition: border-color 140ms;" />
+    <div class="row" style="margin-top: 18px;">
+      <button class="btn ghost" id="name-cancel">Cancel</button>
+      <button class="btn" id="name-save">Save</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-bg" id="welcome-modal" aria-hidden="true">
+  <div class="recipe-card" role="dialog" aria-modal="true" style="max-width: 540px; padding: 28px 32px;">
+    <button class="close" id="welcome-close" aria-label="Close">×</button>
+    <h3 style="font-size: 24px; margin-bottom: 4px;">Welcome to The Overnight Oats Builder</h3>
+    <p style="font-size: 14px; color: var(--muted); margin: 0 0 18px; font-style: italic; line-height: 1.5;">An overnight oats jar that adapts to who you are.</p>
+
+    <p style="font-size: 13.5px; line-height: 1.6; margin: 0 0 16px;"><strong>Start by customising</strong> — set your profile, allergies, dietary preferences, and any ingredients you don't like, all in one place. Banned items get hidden or struck through. Change anytime via the <strong>⚙ Customise</strong> button at the top.</p>
+
+    <p style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 8px;">The 6 tabs</p>
+    <ul style="list-style: none; padding: 0; margin: 0 0 18px; font-size: 13px;">
+      <li style="padding: 4px 0;"><strong style="color: var(--accent);">Builder</strong> · design a jar from scratch with live macros</li>
+      <li style="padding: 4px 0;"><strong style="color: var(--accent);">Inspiration</strong> · tried-and-tested starter recipes</li>
+      <li style="padding: 4px 0;"><strong style="color: var(--accent);">Pantry</strong> · mark what's in your kitchen, get combo suggestions</li>
+      <li style="padding: 4px 0;"><strong style="color: var(--accent);">My Recipes</strong> · save, rate, add notes to your favourites</li>
+      <li style="padding: 4px 0;"><strong style="color: var(--accent);">Weekly Menu</strong> · 7-day plan from your top-rated combos</li>
+      <li style="padding: 4px 0;"><strong style="color: var(--accent);">Shopping</strong> · aggregated list of what to buy</li>
+    </ul>
+
+    <div class="row" style="margin: 0 0 18px;">
+      <button class="btn ghost" id="welcome-customize">⚙ Customise my preferences</button>
+      <button class="btn" id="welcome-ok">Skip — explore first</button>
+    </div>
+
+    <p style="font-size: 12px; color: var(--text); padding: 10px 14px; background: rgba(224,161,88,0.12); border-left: 3px solid var(--warn); border-radius: 6px; line-height: 1.5; margin: 0 0 8px;">
+      <strong>⚠ General nutrition guidance only.</strong> If you're pregnant, breastfeeding, managing a medical condition, or taking medication, please consult your healthcare provider before changing your diet.
+    </p>
+    <p style="font-size: 11.5px; color: var(--muted); margin: 0; line-height: 1.5;">
+      <strong style="color: var(--text);">Privacy:</strong> all data stays in your browser — no login, no tracking.
+    </p>
+  </div>
+</div>
+
+
+<div class="modal-bg" id="customize-modal" aria-hidden="true">
+  <div class="recipe-card" role="dialog" aria-modal="true" style="max-width: 680px; padding: 28px 32px; max-height: 90vh; overflow-y: auto;">
+    <button class="close" id="customize-close" aria-label="Close">×</button>
+    <h3 style="font-size: 22px; margin-bottom: 4px;">Customise your app</h3>
+    <p style="font-size: 13px; color: var(--muted); margin: 0 0 20px;">Set your preferences once. Banned items show struck through with the reason.</p>
+
+    <h4 style="margin-top: 0;">Profile</h4>
+    <select id="cust-profile" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; background: var(--bg); color: var(--text); margin-bottom: 14px;">
+      <option value="regular">Regular</option>
+      <optgroup label="Life stage">
+        <option value="pregnant">Pregnant</option>
+        <option value="postpartum">Postpartum / Breastfeeding</option>
+        <option value="perimenopausal">Perimenopausal</option>
+        <option value="menopausal">Menopausal</option>
+        <option value="ageing">Healthy ageing 60+</option>
+      </optgroup>
+      <optgroup label="Performance">
+        <option value="athletic">Athletic / training</option>
+        <option value="muscle">Muscle building</option>
+      </optgroup>
+      <optgroup label="Health goals">
+        <option value="weightloss">Weight loss</option>
+        <option value="bloodsugar">Diabetes / blood-sugar</option>
+        <option value="antiinflam">Anti-inflammatory</option>
+      </optgroup>
+    </select>
+
+    <h4>Dietary stance</h4>
+    <div style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:14px;">
+      <label class="toggle-switch">
+        <input type="checkbox" id="cust-plant" />
+        <span class="track"></span>
+        <span>Plant-based</span>
+      </label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="cust-gluten" />
+        <span class="track"></span>
+        <span>Gluten-free</span>
+      </label>
+    </div>
+
+    <h4>Allergies</h4>
+    <div class="restr-row" style="margin-bottom:14px;" id="cust-allergies">
+      <button class="restr-chip" data-restr="nuts">Nuts</button>
+      <button class="restr-chip" data-restr="sesame">Sesame</button>
+      <button class="restr-chip" data-restr="soy">Soy</button>
+    </div>
+
+    <h4>Personal dislikes <span style="font-size:11px; font-weight:400; color:var(--muted); text-transform:none; letter-spacing:0;">— tap any ingredient you don't like, it'll be hidden from your suggestions</span></h4>
+    <div id="cust-dislikes-grid" style="margin-bottom:18px;"></div>
+
+    <div class="row" style="margin-top: 8px;">
+      <button class="btn ghost" id="customize-cancel">Cancel</button>
+      <button class="btn" id="customize-save">Save preferences</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="confirm-modal" aria-hidden="true">
+  <div class="recipe-card" role="dialog" aria-modal="true" style="max-width: 420px; padding: 24px 28px;">
+    <h3 style="font-size: 18px; margin-bottom: 6px;">Delete this recipe?</h3>
+    <p id="confirm-text" style="font-size: 13px; color: var(--muted); margin: 0 0 16px;"></p>
+    <div class="row" style="margin-top: 12px;">
+      <button class="btn ghost" id="confirm-cancel">Cancel</button>
+      <button class="btn" id="confirm-ok" style="background: #8A4337; border-color: #8A4337;">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal" aria-hidden="true">
+  <div class="recipe-card" role="dialog" aria-modal="true" aria-labelledby="rc-title">
+    <button class="close" id="close-modal" aria-label="Close">×</button>
+    <h3 id="rc-title">Your Overnight Oats</h3>
+    <div class="meta" id="rc-meta">Serves 1 · ~5 min prep · overnight set</div>
+    <div id="rc-pairing-notes"></div>
+    <h4>Ingredients</h4>
+    <ul class="ing" id="rc-ingredients"></ul>
+    <h4>Method</h4>
+    <ol class="steps" id="rc-steps"></ol>
+    <h4>Why this works for you</h4>
+    <ul class="ing" id="rc-benefits" style="columns: 1; column-gap: 0;"></ul>
+    <h4>Estimated macros</h4>
+    <div class="macros" id="rc-macros"></div>
+    <p style="font-size: 11px; color: var(--muted); margin: 8px 0 0;">Approximations from standard food composition data; will vary by brand.</p>
+    <div class="row">
+      <button class="btn ghost" id="copy-btn">Copy as text</button>
+      <button class="btn ghost" id="print-btn">Print</button>
+      <button class="btn ghost" id="save-btn">Save to My Recipes</button>
+      <button class="btn ghost" id="add-to-shop-btn">+ Shopping list</button>
+      <button class="btn" id="done-btn">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==============================================================
+// INGREDIENT DATA
+// macros: [kcal, protein g, fat g, carb g, fibre g]
+// ==============================================================
+const QTY_METRIC = {"½ medium, sliced": "½ medium (~60g), sliced", "¼ cup": "40g", "¼ cup, sliced": "40g, sliced", "¼ cup, diced": "40g, diced", "¼ cup, pitted": "40g, pitted", "½ small, diced": "~70g, diced", "2 tbsp": "30ml", "½, sliced": "½ (~40g), sliced", "1–2, chopped": "1–2 (~25g), chopped", "1 tbsp": "15ml / 15g", "1 tbsp, chopped": "~9g, chopped", "1 tsp": "5ml / 5g", "+ ¼ cup": "+ 60ml", "1 scoop (~30 g)": "30g", "1 scoop (~10 g)": "10g", "1 square (~5 g)": "5g", "¼ tsp": "1.25ml", "½ tsp": "2.5ml", "⅛ tsp": "0.6ml", "¼ tsp turmeric + pinch pepper": "1.25ml turmeric + pinch pepper", "pinch": "pinch", "½ cup": "40g", "⅔ cup": "160ml"};
+function qty(q) {
+  if (state.units === 'metric' && QTY_METRIC[q]) return QTY_METRIC[q];
+  return q;
+}
+
+const INGREDIENTS = [
+  { id:'banana',         name:'Banana',           cat:'Fruit',           qty:'½ medium, sliced',  macros:[50,0.5,0.2,14,1.6],   benefit:'Slow-release carbs and potassium for steady morning energy' },
+  { id:'blueberries',    name:'Blueberries',      cat:'Fruit',           qty:'¼ cup',             macros:[21,0.3,0.1,5.4,0.9],  benefit:'Anthocyanin antioxidants — supports cognition and vascular health' },
+  { id:'strawberries',   name:'Strawberries',     cat:'Fruit',           qty:'¼ cup, sliced',     macros:[12,0.3,0.1,3,0.8],    benefit:'High vitamin C, low GI — collagen support without a sugar spike' },
+  { id:'raspberries',    name:'Raspberries',      cat:'Fruit',           qty:'¼ cup',             macros:[16,0.4,0.2,3.7,2],    benefit:'8g fibre per cup; ellagic acid for anti-inflammatory effect' },
+  { id:'mango',          name:'Mango',            cat:'Fruit',           qty:'¼ cup, diced',      macros:[25,0.3,0.2,6,0.6],    benefit:'Vitamin A and beta-carotene for skin and immunity' },
+  { id:'apple',          name:'Apple',            cat:'Fruit',           qty:'½ small, diced',    macros:[40,0.2,0.1,11,1.9],   benefit:'Pectin fibre — feeds gut bacteria, slows glucose absorption' },
+  { id:'peach',          name:'Peach',            cat:'Fruit',           qty:'¼ cup, diced',      macros:[15,0.3,0.1,4,0.6],    benefit:'Vitamin C, potassium, and gentle digestive fibre' },
+  { id:'pomegranate',    name:'Pomegranate seeds',cat:'Fruit',           qty:'2 tbsp',            macros:[30,0.6,0.4,6.5,1.4],  benefit:'Punicalagin antioxidants — strong cardiovascular support' },
+  { id:'kiwi',           name:'Kiwi',             cat:'Fruit',           qty:'½, sliced',         macros:[22,0.4,0.2,5.2,1],    benefit:'More vitamin C than orange; actinidin enzyme aids protein digestion' },
+  { id:'dates',          name:'Dates (chopped)',  cat:'Fruit',           qty:'1–2, chopped',      macros:[55,0.4,0,15,1.4],     benefit:'Whole-fruit sweetness with magnesium, potassium and B-vitamins' },
+  { id:'cherries',       name:'Cherries',         cat:'Fruit',           qty:'¼ cup, pitted',     macros:[25,0.4,0.1,6,0.8],    benefit:'Natural melatonin precursors and anti-inflammatory polyphenols' },
+  { id:'pineapple',      name:'Pineapple',        cat:'Fruit',           qty:'¼ cup, diced',      macros:[21,0.2,0,5.5,0.6],    benefit:'Bromelain enzyme aids protein digestion and reduces inflammation' },
+  { id:'pear',           name:'Pear',             cat:'Fruit',           qty:'½ small, diced',    macros:[40,0.3,0.1,11,2.2],   benefit:'Soluble fibre for gut motility; gentle on sensitive stomachs' },
+  { id:'figs_dried',     name:'Figs (dried)',     cat:'Fruit',           qty:'1–2, chopped',      macros:[50,0.5,0.2,13,2],     benefit:'Concentrated calcium, potassium and prebiotic fibre' },
+  { id:'goji',           name:'Goji berries',     cat:'Fruit',           qty:'1 tbsp',            macros:[25,1,0.1,5.4,0.7],    benefit:'Zeaxanthin for eye health; complete amino-acid profile' },
+
+  { id:'almonds',        name:'Almonds',          cat:'Nuts',            qty:'1 tbsp, chopped',   macros:[50,1.8,4.4,1.9,1.1],  benefit:'Vitamin E and monounsaturated fats — heart health and satiety' },
+  { id:'walnuts',        name:'Walnuts',          cat:'Nuts',            qty:'1 tbsp, chopped',   macros:[48,1.1,4.8,1,0.5],    benefit:'Best plant source of omega-3 (ALA) — brain and anti-inflammatory' },
+  { id:'cashews',        name:'Cashews',          cat:'Nuts',            qty:'1 tbsp, chopped',   macros:[50,1.6,4,2.7,0.3],    benefit:'Magnesium and copper — supports stress recovery and connective tissue' },
+  { id:'pecans',         name:'Pecans',           cat:'Nuts',            qty:'1 tbsp, chopped',   macros:[50,0.7,5.2,1,0.7],    benefit:'Highest antioxidant content of any nut; manganese for bone health' },
+  { id:'pistachios',     name:'Pistachios',       cat:'Nuts',            qty:'1 tbsp, chopped',   macros:[45,1.7,3.6,2.2,0.8],  benefit:'Complete protein and lutein for eye health; lowest cal-per-nut' },
+  { id:'macadamia',      name:'Macadamia',        cat:'Nuts',            qty:'1 tbsp, chopped',   macros:[60,0.6,6.4,1.2,0.6],  benefit:'Highest monounsaturated-fat ratio; deeply satiating' },
+  { id:'hazelnuts',      name:'Hazelnuts',        cat:'Nuts',            qty:'1 tbsp, chopped',   macros:[50,1.2,4.8,1.4,0.7],  benefit:'Vitamin E, folate and manganese — cardiovascular support' },
+
+  { id:'chia',           name:'Chia seeds',       cat:'Seeds',           qty:'1 tbsp',            macros:[60,2,4,5,4],          benefit:'Soluble fibre and ALA omega-3; gels overnight to thicken the oats' },
+  { id:'flax',           name:'Flaxseed (ground)',cat:'Seeds',           qty:'1 tsp',             macros:[12,0.5,1,0.6,0.6],    benefit:'Lignans and ALA omega-3 — hormonal balance and gut health' },
+  { id:'hemp',           name:'Hemp seeds',       cat:'Seeds',           qty:'1 tbsp',            macros:[55,3.3,4.6,1,0.4],    benefit:'Complete plant protein with ideal omega-6 to omega-3 ratio' },
+  { id:'pumpkin',        name:'Pumpkin seeds',    cat:'Seeds',           qty:'1 tbsp',            macros:[50,2.5,4,1.2,0.5],    benefit:'Zinc for immunity; magnesium for sleep and muscle recovery' },
+  { id:'sunflower',      name:'Sunflower seeds',  cat:'Seeds',           qty:'1 tbsp',            macros:[50,1.8,4.5,2,0.8],    benefit:'Vitamin E and selenium for skin and thyroid support' },
+  { id:'sesame',         name:'Sesame seeds',     cat:'Seeds',           qty:'1 tsp',             macros:[17,0.5,1.5,0.7,0.4],  benefit:'Calcium and lignans — bone density and hormonal balance' },
+
+  { id:'extra_yogurt',   name:'Greek yogurt (extra)', cat:'Protein & dairy', qty:'+ ¼ cup',       macros:[50,5,1.5,3,0],        benefit:'Extra protein plus live cultures for the gut microbiome' },
+  { id:'cottage_cheese', name:'Cottage cheese (extra)', cat:'Protein & dairy', qty:'¼ cup',             macros:[50,7,1,3,0],          benefit:'Slow-release casein protein — sustained satiety for hours' },
+  { id:'protein_powder', name:'Whey protein',     cat:'Protein & dairy', qty:'1 scoop (~30 g)',   macros:[120,24,1.5,3,0.5],    benefit:'Fast-absorbing — best for post-workout recovery and muscle synthesis' },
+  { id:'protein_plant',  name:'Plant protein',    cat:'Protein & dairy', qty:'1 scoop (~30 g)',   macros:[110,22,2,2,1.5],      benefit:'Pea/rice/hemp blend — sustained protein with fibre, dairy-free' },
+  { id:'collagen',       name:'Collagen powder',  cat:'Protein & dairy', qty:'1 scoop (~10 g)',   macros:[35,9,0,0,0],          benefit:'Type I/III peptides for skin, hair, joints and gut lining' },
+
+  { id:'almond_butter',  name:'Almond butter',    cat:'Butters & fats',  qty:'1 tbsp',            macros:[95,3.4,8.5,3.5,1.6],  benefit:'Monounsaturated fats and vitamin E without spiking blood sugar' },
+  { id:'peanut_butter',  name:'Peanut butter',    cat:'Butters & fats',  qty:'1 tbsp',            macros:[95,4,8,3.5,1],        benefit:'Plant protein and niacin in a satiating fat-protein combo' },
+  { id:'tahini',         name:'Tahini',           cat:'Butters & fats',  qty:'1 tbsp',            macros:[90,2.5,8,3,1.4],      benefit:'Calcium, iron and lignans — Mediterranean nutrient density' },
+  { id:'coconut_cream',  name:'Coconut cream',    cat:'Butters & fats',  qty:'2 tbsp',            macros:[60,0.6,6,1.5,0.4],    benefit:'Medium-chain triglycerides for quick clean energy' },
+  { id:'cashew_butter',  name:'Cashew butter',    cat:'Butters & fats',  qty:'1 tbsp',            macros:[95,3,8,4,0.4],        benefit:'Smooth fats with magnesium and zinc for skin and recovery' },
+
+  { id:'honey',          name:'Honey',            cat:'Sweeteners',      qty:'1 tsp',             macros:[21,0,0,5.8,0],        benefit:'Raw enzymes and antimicrobial compounds; stable energy source' },
+  { id:'maple',          name:'Maple syrup',      cat:'Sweeteners',      qty:'1 tsp',             macros:[17,0,0,4.5,0],        benefit:'Manganese and zinc with lower GI than refined sugar' },
+  { id:'date_paste',     name:'Date paste',       cat:'Sweeteners',      qty:'1 tsp',             macros:[15,0.1,0,4,0.4],      benefit:'Whole-fruit sweetness with fibre intact — slower glucose response' },
+
+  { id:'cacao_nibs',     name:'Cacao nibs',       cat:'Extras & superfoods', qty:'1 tsp',         macros:[25,0.6,2,2,1],        benefit:'Flavanols and magnesium without sugar — mood and circulation' },
+  { id:'dark_chocolate', name:'Dark chocolate',   cat:'Extras & superfoods', qty:'1 square (~5 g)', macros:[30,0.4,2,3,0.5],    benefit:'70%+ cocoa delivers polyphenols and iron in a small dose' },
+  { id:'coconut_flakes', name:'Coconut flakes',   cat:'Extras & superfoods', qty:'1 tbsp',        macros:[33,0.3,3.2,1.2,0.8],  benefit:'MCTs and fibre; satisfying crunch with no added sugar' },
+  { id:'granola',        name:'Granola',          cat:'Extras & superfoods', qty:'2 tbsp',        macros:[60,1.5,2,9,1],        benefit:'Sustained-energy carbs — check label for added sugar' },
+  { id:'bee_pollen',     name:'Bee pollen',       cat:'Extras & superfoods', qty:'1 tsp',         macros:[16,1,0.2,2,0.1],      benefit:'Trace amino acids, B-vitamins and antioxidants — energy support' },
+  { id:'cacao_powder',   name:'Cacao powder',     cat:'Extras & superfoods', qty:'1 tsp',         macros:[12,1,0.7,2,1],        benefit:'Concentrated flavanols and magnesium; anti-inflammatory' },
+
+  { id:'cinnamon',       name:'Cinnamon',         cat:'Spices & powders', qty:'¼ tsp',            macros:[2,0,0,0.6,0.4],       benefit:'Helps regulate post-meal blood sugar; warming and circulatory' },
+  { id:'vanilla',        name:'Vanilla extract',  cat:'Spices & powders', qty:'¼ tsp',            macros:[3,0,0,0.1,0],         benefit:'Reduces sugar cravings; mild antioxidant compounds' },
+  { id:'matcha',         name:'Matcha powder',    cat:'Spices & powders', qty:'½ tsp',            macros:[5,0.3,0.1,1,0.6],     benefit:'L-theanine plus caffeine for calm focus; chlorophyll-rich' },
+  { id:'turmeric_pep',   name:'Turmeric + black pepper', cat:'Spices & powders', qty:'¼ tsp turmeric + pinch pepper', macros:[3,0.1,0.1,0.6,0.2], benefit:'Curcumin (with pepper for absorption) — strong anti-inflammatory' },
+  { id:'cardamom',       name:'Cardamom',         cat:'Spices & powders', qty:'⅛ tsp',            macros:[2,0,0,0.4,0.2],       benefit:'Aids digestion, reduces bloating, freshens breath' },
+  { id:'maca',           name:'Maca powder',      cat:'Spices & powders', qty:'½ tsp',            macros:[10,0.4,0.1,2,0.2],    benefit:'Adaptogen — supports hormonal balance, energy and libido' },
+  { id:'spirulina',      name:'Spirulina',        cat:'Spices & powders', qty:'½ tsp',            macros:[4,0.8,0.1,0.3,0],     benefit:'Complete protein, chlorophyll and trace minerals — nutrient-dense' },
+  { id:'ginger',         name:'Ginger (ground)',  cat:'Spices & powders', qty:'¼ tsp',            macros:[2,0,0,0.4,0.1],       benefit:'Anti-nausea and anti-inflammatory; supports digestion' },
+  { id:'nutmeg',         name:'Nutmeg',           cat:'Spices & powders', qty:'pinch',            macros:[3,0,0.2,0.3,0.1],     benefit:'Calming compounds for sleep; aids digestion in small doses' },
+  { id:'sea_salt',       name:'Sea salt flakes',  cat:'Spices & powders', qty:'pinch',            macros:[0,0,0,0,0],           benefit:'Trace minerals and electrolyte balance; amplifies sweetness' },
+  { id:'citrus_zest',    name:'Citrus zest (lemon/orange)', cat:'Spices & powders', qty:'½ tsp', macros:[1,0,0,0.3,0.1],        benefit:'Vitamin C and limonene; supports liver detox and brightens mood' },
+];
+
+const ID = Object.fromEntries(INGREDIENTS.map(i => [i.id, i]));
+
+// Pairing rules — flavour compatibility
+const RAW_CLASHES = [
+  ['kiwi',        ['extra_yogurt','cottage_cheese']],
+  ['pineapple',   ['extra_yogurt','cottage_cheese']],
+  ['turmeric_pep',['cacao_nibs','dark_chocolate','cacao_powder','blueberries','raspberries','strawberries','cherries','pomegranate','goji','peanut_butter']],
+  ['spirulina',   ['strawberries','raspberries','cherries','peach','pomegranate','figs_dried','honey','cinnamon','cardamom','vanilla','apple','pear']],
+  ['matcha',      ['strawberries','raspberries','cherries','pomegranate','peach','figs_dried','peanut_butter','goji']],
+  ['maca',        ['citrus_zest','kiwi','pineapple','raspberries']],
+  ['bee_pollen',  ['spirulina','turmeric_pep']],
+];
+
+const RAW_LOVES = [
+  ['peanut_butter', ['banana','apple','cinnamon','dark_chocolate','cacao_nibs','cacao_powder','honey','dates']],
+  ['almond_butter', ['raspberries','strawberries','cherries','dark_chocolate','cacao_nibs','cardamom']],
+  ['tahini',        ['honey','dates','sesame','dark_chocolate','sea_salt','figs_dried','cinnamon']],
+  ['coconut_cream', ['mango','pineapple','cardamom','citrus_zest','turmeric_pep','ginger']],
+  ['cinnamon',      ['apple','walnuts','maple','dates','pear','peanut_butter','almond_butter']],
+  ['cacao_nibs',    ['cherries','hazelnuts','almond_butter','peanut_butter','dates','raspberries']],
+  ['cacao_powder',  ['cherries','hazelnuts','banana','almond_butter','peanut_butter','maca']],
+  ['dark_chocolate',['cherries','hazelnuts','almond_butter','peanut_butter','tahini','sea_salt','raspberries']],
+  ['pistachios',    ['cardamom','honey','figs_dried']],
+  ['walnuts',       ['pear','dates','cardamom','cinnamon','apple','maple']],
+  ['hazelnuts',     ['cacao_nibs','cacao_powder','dark_chocolate','banana']],
+  ['maca',          ['cacao_powder','cacao_nibs','banana','almond_butter']],
+  ['turmeric_pep',  ['ginger','coconut_cream','mango','coconut_flakes','citrus_zest']],
+  ['spirulina',     ['banana','coconut_cream','coconut_flakes','almond_butter']],
+  ['matcha',        ['vanilla','coconut_cream','coconut_flakes','almond_butter','honey']],
+  ['sea_salt',      ['dark_chocolate','tahini','peanut_butter','dates','maple']],
+  ['citrus_zest',   ['blueberries','pomegranate','pistachios','almond_butter','vanilla','cardamom']],
+  ['ginger',        ['turmeric_pep','mango','pear','apple','coconut_cream']],
+  ['goji',          ['cacao_nibs','dark_chocolate','almond_butter','coconut_flakes']],
+  ['figs_dried',    ['tahini','pistachios','honey','walnuts','cardamom']],
+  ['pear',          ['walnuts','cardamom','ginger','cinnamon','maple']],
+  ['pineapple',     ['coconut_cream','coconut_flakes','mango','turmeric_pep','citrus_zest']],
+  ['cherries',      ['cacao_nibs','dark_chocolate','almond_butter','cacao_powder']],
+];
+
+const clashMap = {};
+const loveMap = {};
+function addBidir(map, a, list) {
+  if (!map[a]) map[a] = new Set();
+  list.forEach(b => {
+    if (!ID[b]) return;
+    map[a].add(b);
+    if (!map[b]) map[b] = new Set();
+    map[b].add(a);
+  });
+}
+RAW_CLASHES.forEach(([a, list]) => addBidir(clashMap, a, list));
+RAW_LOVES.forEach(([a, list]) => addBidir(loveMap, a, list));
+
+// ==============================================================
+// PROFILE LOGIC
+// ==============================================================
+const PROFILES = {
+  regular:        { label: 'Regular',                    note: '',                                                                                              caution: '' },
+  menopausal:     { label: 'Menopausal',                 note: 'Phyto-oestrogens, calcium, magnesium and omega-3 prioritised',                                  caution: '' },
+  perimenopausal: { label: 'Perimenopausal',             note: 'Magnesium for mood and sleep, iron for menstrual cycles, B-vits, blood-sugar stability',       caution: '' },
+  athletic:       { label: 'Athletic',                   note: 'High protein and ready carbs; recovery-friendly fats',                                          caution: '' },
+  pregnant:       { label: 'Pregnant',                   note: 'Iron, omega-3, calcium prioritised; insufficient-data adaptogens excluded',                     caution: 'General guidance only — speak to your obstetrician or midwife about any dietary changes in pregnancy.' },
+  postpartum:     { label: 'Postpartum',                 note: 'Iron recovery, omega-3, oats as galactagogue; spirulina/maca still flagged while breastfeeding', caution: 'General guidance only — speak to your GP, lactation consultant, or paediatrician for personalised advice while breastfeeding.' },
+  ageing:         { label: 'Healthy ageing 60+',         note: 'Bone density, cognition, gentle digestion',                                                     caution: '' },
+  muscle:         { label: 'Muscle building',            note: 'High protein (≥30g), surplus calories, slow-release carbs',                                     caution: '' },
+  weightloss:     { label: 'Weight loss',                note: 'Lower calorie density, high protein for satiety, low-GI fruits',                                caution: '' },
+  bloodsugar:     { label: 'Diabetes / blood-sugar',     note: 'High protein, high fibre, low-GI fruits, no added sweeteners',                                  caution: 'General nutrition guidance only — your endocrinologist or GP\'s advice takes precedence for diabetes management.' },
+  antiinflam:     { label: 'Anti-inflammatory',          note: 'Turmeric, ginger, omega-3, polyphenol-rich berries, dark cocoa',                                caution: '' },
+};
+
+// Hard-banned ingredients per profile — only documented safety contraindications (not lifestyle)
+const PROFILE_BANS = {
+  regular: {},
+  menopausal: {},
+  athletic: {},
+  pregnant: {
+    bee_pollen: 'Allergen risk and insufficient pregnancy safety data',
+    spirulina:  'Heavy-metal contamination concerns; insufficient pregnancy safety data',
+    maca:       'Adaptogen — insufficient safety data in pregnancy',
+    goji:       'Limited safety research; some authorities recommend avoiding in pregnancy',
+  },
+  bloodsugar: {},
+};
+
+// Allergy / intolerance bans — applied as toggles independent of profile
+const ALLERGY_BANS = {
+  nuts: {
+    label: 'Nut allergy (tree nuts + peanut)',
+    items: {
+      almonds:        'Tree nut',
+      walnuts:        'Tree nut',
+      cashews:        'Tree nut',
+      pecans:         'Tree nut',
+      pistachios:     'Tree nut',
+      macadamia:      'Tree nut',
+      hazelnuts:      'Tree nut',
+      almond_butter:  'Tree nut (almond)',
+      cashew_butter:  'Tree nut (cashew)',
+      peanut_butter:  'Peanut',
+    },
+  },
+  sesame: {
+    label: 'Sesame allergy',
+    items: { sesame: 'Contains sesame', tahini: 'Tahini is sesame paste' },
+  },
+  soy: {
+    label: 'Soy allergy',
+    items: {}, // soy milk + soy yogurt handled in selector filters
+  },
+  gluten: {
+    label: 'Gluten-free',
+    items: { granola: 'Most granola contains gluten unless certified GF' },
+  },
+};
+
+// Recommended ingredients per profile (with reason)
+const PROFILE_RECOMMENDS = {
+  regular: {},
+  menopausal: {
+    flax:         'Lignans support hormonal balance',
+    sesame:       'Calcium and lignans for bone density',
+    pumpkin:      'Magnesium for sleep, zinc for immunity',
+    walnuts:      'Omega-3 ALA — anti-inflammatory',
+    hemp:         'Complete protein with omega-3',
+    cardamom:     'Eases bloating common in menopause',
+    almonds:      'Vitamin E and calcium support',
+  },
+  perimenopausal: {
+    pumpkin:         'Magnesium for sleep and mood; iron for menstrual losses',
+    almonds:         'Magnesium and vitamin E',
+    cashews:         'Magnesium for sleep and stress',
+    walnuts:         'Omega-3 supports mood and reduces inflammation',
+    flax:            'Lignans for hormonal balance, omega-3 for mood',
+    dark_chocolate:  'Magnesium and polyphenols for mood',
+    cacao_nibs:      'Magnesium without sugar',
+    hemp:            'B-vitamins and complete protein',
+    sesame:          'Calcium and iron',
+    cinnamon:        'Blood sugar stability through cycle fluctuations',
+    cottage_cheese:  'Slow-release casein for sustained satiety',
+  },
+  athletic: {
+    cottage_cheese:  'High slow-release casein protein',
+    protein_powder:  'Convenient post-training protein',
+    protein_plant:   'Plant-based recovery protein',
+    peanut_butter:   'Protein plus carbs for fuel',
+    almond_butter:   'Healthy fats for endurance',
+    hemp:            'Complete plant protein',
+    dates:           'Fast carbs for pre/post training',
+    banana:          'Quick carbs and potassium for cramps',
+  },
+  muscle: {
+    protein_powder:  'Whey protein for fast muscle synthesis',
+    protein_plant:   'Plant-based muscle protein',
+    cottage_cheese:  'Slow-release casein for sustained protein',
+    skyr:            'Densest dairy protein per spoon',
+    greek_full:      'Calcium-rich protein with satiating fat',
+    peanut_butter:   'Calories and protein in one',
+    almond_butter:   'Calorie-dense fat for surplus',
+    dates:           'Quick carbs for energy',
+    banana:          'Carbs and potassium',
+    hemp:            'Complete plant protein',
+  },
+  weightloss: {
+    cottage_cheese:  'Highest protein-to-calorie ratio',
+    skyr:            'Densest protein, very low calorie',
+    greek_zero:      'High protein, no fat calories',
+    protein_powder:  'Adds 24g protein for ~120 kcal',
+    protein_plant:   'Plant-based protein boost',
+    raspberries:     'Highest fibre, lowest sugar berry',
+    strawberries:    'Low-cal, high-volume',
+    blueberries:     'Low GI, high antioxidants',
+    cinnamon:        'Helps regulate appetite and glucose',
+    chia:            'Expands in water, increases satiety',
+  },
+  pregnant: {
+    walnuts:         'Omega-3 for foetal brain development',
+    flax:            'Omega-3 ALA',
+    pumpkin:         'Iron and zinc',
+    sesame:          'Calcium for bone development',
+    dark_chocolate:  'Iron and magnesium in moderation',
+    almonds:         'Vitamin E and folate',
+    dates:           'Iron, fibre; some studies suggest easier late-term labour',
+  },
+  postpartum: {
+    walnuts:         'Omega-3 ALA — passes through breast milk for baby brain development',
+    flax:            'Omega-3 and lignans',
+    dates:           'Iron recovery and slow-release energy',
+    sesame:          'Calcium and iron support',
+    almonds:         'Vitamin E and calcium',
+    dark_chocolate:  'Iron and magnesium for recovery',
+    cottage_cheese:  'Slow-release protein for energy through night feeds',
+    pumpkin:         'Zinc and iron',
+    hemp:            'Complete protein for recovery',
+  },
+  ageing: {
+    sesame:          'Calcium for bone density',
+    almonds:         'Vitamin E, calcium, magnesium',
+    walnuts:         'Omega-3 for cognition',
+    flax:            'Omega-3 and digestive support',
+    blueberries:     'Anthocyanins for cognitive function',
+    banana:          'Potassium for blood pressure, easy to digest',
+    pear:            'Gentle fibre for digestion',
+    greek_full:      'Calcium, vitamin D, full fat for fat-soluble vitamins',
+    dark_chocolate:  'Polyphenols for cardiovascular and cognitive health',
+    cinnamon:        'Anti-inflammatory and circulation',
+  },
+  bloodsugar: {
+    cottage_cheese: 'Slow-release casein, no sugar',
+    hemp:           'Protein and fat slow glucose absorption',
+    almonds:        'Healthy fats slow absorption',
+    walnuts:        'Omega-3 anti-inflammatory',
+    cinnamon:       'Helps regulate post-meal glucose',
+    blueberries:    'Low GI, polyphenols improve insulin sensitivity',
+    raspberries:    'High fibre, lowest sugar berry',
+    strawberries:   'Low GI, vitamin C',
+    almond_butter:  'Fat and protein blunt glucose response',
+    flax:           'Soluble fibre slows glucose',
+    cacao_powder:   'Flavanols may improve insulin sensitivity',
+  },
+  antiinflam: {
+    turmeric_pep:    'Curcumin (with pepper) — strong anti-inflammatory',
+    ginger:          'Anti-inflammatory and digestive',
+    walnuts:         'Omega-3 ALA reduces systemic inflammation',
+    flax:            'Omega-3 and lignans',
+    blueberries:     'Anthocyanins, polyphenols',
+    raspberries:     'Ellagic acid, anti-inflammatory',
+    cherries:        'Tart cherries reduce inflammation markers',
+    cacao_powder:    'Flavanols, anti-inflammatory',
+    cacao_nibs:      'Polyphenols without added sugar',
+    dark_chocolate:  '70%+ cocoa for polyphenols',
+    hemp:            'Balanced omega-3:6 ratio',
+    almond_butter:   'Vitamin E, anti-inflammatory fats',
+  },
+};
+
+// Plant-based modifier
+const PLANT_BANS = {
+  extra_yogurt:   'Contains dairy',
+  cottage_cheese: 'Contains dairy',
+  honey:          'Animal-derived (bee product)',
+  bee_pollen:     'Animal-derived (bee product)',
+  collagen:       'Animal-derived (typically bovine or marine)',
+};
+
+// ==============================================================
+// MILK + YOGURT DATA
+// ==============================================================
+const MILK_DATA = {
+  none:        { name: '',                          short: 'None',            plant: true,  macros: [0,   0,   0,   0,  0],   benefit: null },
+  full_fat:    { name: 'full-fat dairy milk',       short: 'Full-fat dairy',  plant: false, macros: [100, 5,   5,   8,  0],   benefit: 'Complete protein, fat-soluble vitamins (A, D), and calcium for bones' },
+  skimmed:     { name: 'skimmed dairy milk',        short: 'Skimmed dairy',   plant: false, macros: [70,  6,   0.4, 10, 0],   benefit: 'High protein and calcium without saturated fat' },
+  almond:      { name: 'unsweetened almond milk',   short: 'Almond',          plant: true,  macros: [25,  0.7, 1.7, 1,  0.5], benefit: 'Low calorie, vitamin E; pair with high-protein toppings to compensate' },
+  oat:         { name: 'oat milk',                  short: 'Oat',             plant: true,  macros: [80,  2,   4,   11, 1],   benefit: 'Beta-glucan fibre and natural sweetness; higher carb than other plant milks' },
+  soy:         { name: 'unsweetened soy milk',      short: 'Soy',             plant: true,  macros: [70,  7,   3.5, 4,  0.5], benefit: 'Highest plant-protein milk; isoflavones support hormonal balance' },
+  coconut:     { name: 'drinking coconut milk',     short: 'Coconut',         plant: true,  macros: [40,  0.4, 3,   3,  0],   benefit: 'Tropical, lactose-free; MCTs for quick energy; lower protein' },
+};
+const YOGURT_DATA = {
+  none:        { name: '',                          short: 'None',            plant: true,  macros: [0,   0,   0,   0,   0],   benefit: null },
+  greek_full:  { name: 'Greek yogurt (full-fat)',   short: 'Greek full-fat',  plant: false, macros: [50,  5,   1.5, 3,   0],   benefit: 'Casein protein for satiety; full fat aids absorption of fat-soluble vitamins' },
+  greek_zero:  { name: 'Greek yogurt (0%)',         short: 'Greek 0%',        plant: false, macros: [35,  6,   0,   3,   0],   benefit: 'Highest protein-to-calorie ratio; live cultures for the gut microbiome' },
+  cottage:     { name: 'Cottage cheese',            short: 'Cottage cheese',  plant: false, macros: [50,  7,   1,   3,   0],   benefit: 'Slow-release casein protein for sustained satiety' },
+  skyr:        { name: 'Skyr',                      short: 'Skyr',            plant: false, macros: [60,  11,  0.2, 3.5, 0],   benefit: 'Densest dairy protein (~11g/¼ cup); low fat, high calcium' },
+  coco_yog:    { name: 'Coconut yogurt',            short: 'Coconut yogurt',  plant: true,  macros: [45,  1,   4,   2,   0.5], benefit: 'Plant-based, MCT-rich; lower protein but creamy fat' },
+  soy_yog:     { name: 'Soy yogurt',                short: 'Soy yogurt',      plant: true,  macros: [50,  4,   2,   4,   0.5], benefit: 'Plant protein with isoflavones — strong menopausal pick' },
+};
+const BASE_FIXED = [
+  { id: 'oats', name: 'rolled oats', qty: '½ cup', macros: [150, 5, 3, 27, 4], benefit: 'Beta-glucan fibre supports cholesterol regulation and steady glucose; manganese for metabolism' },
+];
+
+// ==============================================================
+// STATE
+// ==============================================================
+const state = {
+  profile: 'regular',
+  plantBased: false,
+  restrictions: new Set(),  // 'tree_nut', 'peanut', 'sesame', 'soy', 'gluten'
+  mode: 'freestyle',
+  milk: 'none',
+  yogurt: 'none',
+  selected: new Set(),
+  servings: 1,
+  recipesSort: 'rating',
+  recipesFilter: 'all',
+  units: 'imperial',
+  dislikes: new Set(),
+};
+
+// Profile macro targets (per serving). Only protein and fibre are tracked as "min met";
+// other macros are informational depending on profile goals.
+const MACRO_TARGETS = {
+  regular:    { protein: null, fibre: null },
+  menopausal:     { protein: 18, fibre: 10 },
+  perimenopausal: { protein: 18, fibre: 10 },
+  athletic:   { protein: 25, fibre: 8 },
+  muscle:     { protein: 35, fibre: 8 },
+  weightloss: { protein: 25, fibre: 10 },
+  pregnant:   { protein: 20, fibre: 10 },
+  postpartum: { protein: 22, fibre: 10 },
+  ageing:     { protein: 18, fibre: 10 },
+  bloodsugar: { protein: 20, fibre: 10 },
+  antiinflam: { protein: 18, fibre: 10 },
+};
+
+const CATS_ORDER = ['Fruit','Nuts','Seeds','Protein & dairy','Butters & fats','Sweeteners','Extras & superfoods','Spices & powders'];
+
+// ==============================================================
+// RENDER
+// ==============================================================
+function isMilkAllowed(k) {
+  const v = MILK_DATA[k];
+  if (state.plantBased && !v.plant) return false;
+  if (state.restrictions.has('nuts') && k === 'almond') return false;
+  if (state.restrictions.has('soy') && k === 'soy') return false;
+  return true;
+}
+function isYogurtAllowed(k) {
+  const v = YOGURT_DATA[k];
+  if (state.plantBased && !v.plant) return false;
+  if (state.restrictions.has('soy') && k === 'soy_yog') return false;
+  return true;
+}
+function renderMilkSelect() {
+  const sel = document.getElementById('milk-select');
+  const cur = state.milk;
+  sel.innerHTML = '';
+  Object.entries(MILK_DATA).forEach(([k, v]) => {
+    if (!isMilkAllowed(k)) return;
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = v.short;
+    sel.appendChild(opt);
+  });
+  if (!sel.querySelector(`option[value="${cur}"]`)) {
+    state.milk = sel.value;
+  } else {
+    sel.value = cur;
+  }
+}
+function renderYogurtSelect() {
+  const sel = document.getElementById('yogurt-select');
+  const cur = state.yogurt;
+  sel.innerHTML = '';
+  Object.entries(YOGURT_DATA).forEach(([k, v]) => {
+    if (!isYogurtAllowed(k)) return;
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = v.short;
+    sel.appendChild(opt);
+  });
+  if (!sel.querySelector(`option[value="${cur}"]`)) {
+    state.yogurt = sel.value;
+  } else {
+    sel.value = cur;
+  }
+}
+
+function renderCategories() {
+  const root = document.getElementById('categories');
+  root.innerHTML = '';
+  CATS_ORDER.forEach(cat => {
+    const items = INGREDIENTS.filter(i => i.cat === cat);
+    if (!items.length) return;
+    const section = document.createElement('div');
+    section.className = 'cat';
+    const head = document.createElement('div');
+    head.className = 'cat-head';
+    head.innerHTML = `<span class="cat-name">${cat}</span>`;
+    section.appendChild(head);
+    const chips = document.createElement('div');
+    chips.className = 'chips';
+    items.forEach(i => {
+      const b = document.createElement('button');
+      b.className = 'chip';
+      b.dataset.id = i.id;
+      b.textContent = i.name;
+      b.title = `${qty(i.qty)} · ${i.benefit}`;
+      b.addEventListener('click', () => onChipClick(i.id));
+      chips.appendChild(b);
+    });
+    section.appendChild(chips);
+    root.appendChild(section);
+  });
+  refreshAll();
+}
+
+function getProfileBan(id) {
+  // Personal dislikes first (most personal)
+  if (state.dislikes && state.dislikes.has(id)) return "You've marked this as a personal dislike — edit in Customise (?)";
+  // Check allergy bans
+  for (const r of state.restrictions) {
+    const allergyItems = (ALLERGY_BANS[r] || {}).items || {};
+    if (allergyItems[id]) return `${ALLERGY_BANS[r].label}: ${allergyItems[id]}`;
+  }
+  // Then profile safety bans (currently only pregnancy)
+  const profileBans = PROFILE_BANS[state.profile] || {};
+  if (profileBans[id]) return `Pregnancy: ${profileBans[id]}`;
+  // Then plant-based modifier
+  if (state.plantBased && PLANT_BANS[id]) return `Plant-based: ${PLANT_BANS[id]}`;
+  return null;
+}
+function getProfileRecommend(id) {
+  const recs = PROFILE_RECOMMENDS[state.profile] || {};
+  return recs[id] || null;
+}
+
+function onChipClick(id) {
+  const chip = document.querySelector(`.chip[data-id="${id}"]`);
+  if (chip.classList.contains('banned') || chip.classList.contains('clash')) return;
+  if (state.selected.has(id)) state.selected.delete(id);
+  else state.selected.add(id);
+  refreshAll();
+}
+
+function refreshAll() {
+  refreshChipStates();
+  refreshMacroBar();
+  refreshBenefitsPanel();
+  document.getElementById('profile-note').textContent = PROFILES[state.profile].note;
+  const cautionEl = document.getElementById('profile-caution');
+  const cautionText = (PROFILES[state.profile] || {}).caution;
+  if (cautionText) {
+    cautionEl.textContent = '⚠ ' + cautionText;
+    cautionEl.style.display = '';
+  } else {
+    cautionEl.style.display = 'none';
+  }
+  if (typeof refreshSoftWarning === 'function') refreshSoftWarning();
+}
+
+function refreshChipStates() {
+  const clashSet = new Set();
+  const loved = new Set();
+  if (state.mode === 'best' && state.selected.size > 0) {
+    state.selected.forEach(sel => {
+      (clashMap[sel] || []).forEach(c => {
+        if (!state.selected.has(c)) clashSet.add(c);
+      });
+      (loveMap[sel] || []).forEach(l => {
+        if (!state.selected.has(l)) loved.add(l);
+      });
+    });
+  }
+  document.querySelectorAll('.chip').forEach(chip => {
+    const id = chip.dataset.id;
+    const banReason = getProfileBan(id);
+    const recReason = getProfileRecommend(id);
+    chip.classList.toggle('selected', state.selected.has(id));
+    chip.classList.toggle('banned', !!banReason && !state.selected.has(id));
+    chip.classList.toggle('clash', clashSet.has(id) && !state.selected.has(id) && !banReason);
+    chip.classList.toggle('loved', loved.has(id) && !state.selected.has(id));
+    chip.classList.toggle('recommended', !!recReason && !banReason);
+
+    if (banReason) {
+      chip.title = banReason;
+    } else if (clashSet.has(id)) {
+      const culprits = [...state.selected].filter(s => (clashMap[s] || new Set()).has(id))
+        .map(s => ID[s].name).join(', ');
+      chip.title = `Clashes with: ${culprits}`;
+    } else if (recReason) {
+      chip.title = `★ Recommended for ${PROFILES[state.profile].label}: ${recReason} · ${ID[id].qty}`;
+    } else {
+      chip.title = `${qty(ID[id].qty)} · ${ID[id].benefit}`;
+    }
+  });
+}
+
+function computeTotals() {
+  const milk = MILK_DATA[state.milk];
+  const yog = YOGURT_DATA[state.yogurt];
+  const baseList = [
+    ...BASE_FIXED,
+    { name: yog.name, qty: '¼ cup', macros: yog.macros },
+    { name: milk.name, qty: '⅔ cup', macros: milk.macros },
+  ];
+  const toppings = [...state.selected].map(id => ID[id]);
+  const all = [...baseList, ...toppings];
+  return all.reduce((acc, it) => acc.map((v,i) => v + it.macros[i]), [0,0,0,0,0]);
+}
+
+function refreshMacroBar() {
+  const tBase = computeTotals();
+  const s = state.servings;
+  const t = tBase.map(v => v * s);
+  document.getElementById('m-kcal').textContent = Math.round(t[0]);
+  document.getElementById('m-prot').textContent = Math.round(t[1]);
+  document.getElementById('m-fat').textContent  = Math.round(t[2]);
+  document.getElementById('m-carb').textContent = Math.round(t[3]);
+  document.getElementById('m-fib').textContent  = Math.round(t[4]);
+
+  // Targets — only protein + fibre, only when not regular
+  const target = MACRO_TARGETS[state.profile] || {};
+  const setTarget = (id, current, tgt) => {
+    const el = document.getElementById(id);
+    if (tgt == null) { el.textContent = ''; el.classList.remove('met'); return; }
+    el.textContent = `target ${tgt}g`;
+    el.classList.toggle('met', current >= tgt);
+  };
+  setTarget('t-prot', t[1], target.protein);
+  setTarget('t-fib',  t[4], target.fibre);
+  document.getElementById('t-kcal').textContent = '';
+  document.getElementById('t-fat').textContent  = '';
+  document.getElementById('t-carb').textContent = '';
+
+  document.getElementById('srv-v').textContent = s + '×';
+
+  // Dim qty labels when None is selected, also update for unit pref
+  const milkQ = document.getElementById('milk-qty');
+  const yogQ  = document.getElementById('yogurt-qty');
+  milkQ.style.opacity  = state.milk   === 'none' ? '0.35' : '1';
+  yogQ.style.opacity   = state.yogurt === 'none' ? '0.35' : '1';
+  milkQ.textContent = qty('⅔ cup');
+  yogQ.textContent  = qty('¼ cup');
+  // Also update the static oats label in base
+  const oatsLabel = document.querySelector('.base-row .row .qty');
+  if (oatsLabel) oatsLabel.textContent = qty('½ cup');
+}
+
+function refreshBenefitsPanel() {
+  const root = document.getElementById('benefits-list');
+  root.innerHTML = '';
+
+  const addItem = (name, benefit, qty, recReason) => {
+    if (!benefit) return;
+    const star = recReason ? '<span style="color:var(--gold);font-size:11px"> ★</span>' : '';
+    const recLine = recReason
+      ? `<div class="why" style="color:var(--accent);font-style:italic;margin-top:4px">${recReason}</div>` : '';
+    const div = document.createElement('div');
+    div.className = 'benefit-item';
+    div.innerHTML =
+      `<div class="name">${name}${star}</div>
+       <div class="why">${benefit}</div>
+       ${recLine}
+       <div class="qty">${qty}</div>`;
+    root.appendChild(div);
+  };
+
+  // Base — always shown
+  BASE_FIXED.forEach(b => addItem(b.name.charAt(0).toUpperCase() + b.name.slice(1), b.benefit, qty(b.qty), null));
+
+  // Milk + yogurt if selected
+  const milk = MILK_DATA[state.milk];
+  if (milk && milk.benefit) addItem(milk.short, milk.benefit, qty('⅔ cup'), null);
+  const yog = YOGURT_DATA[state.yogurt];
+  if (yog && yog.benefit) addItem(yog.short, yog.benefit, qty('¼ cup'), null);
+
+  // Selected toppings
+  const ordered = INGREDIENTS.filter(i => state.selected.has(i.id));
+  ordered.forEach(i => addItem(i.name, i.benefit, qty(i.qty), getProfileRecommend(i.id)));
+}
+
+function showToast(html) {
+  const wrap = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = html;
+  wrap.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 300);
+  }, 4200);
+}
+
+// ==============================================================
+// EVENT WIRING
+// ==============================================================
+document.querySelectorAll('.mode-toggle button').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.mode-toggle button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    state.mode = b.dataset.mode;
+    refreshAll();
+  });
+});
+
+document.getElementById('profile-select').addEventListener('change', (e) => {
+  state.profile = e.target.value;
+  const newlyBanned = [...state.selected].filter(id => getProfileBan(id));
+  newlyBanned.forEach(id => state.selected.delete(id));
+  if (newlyBanned.length) {
+    showToast(`Removed <strong>${newlyBanned.map(id => ID[id].name).join(', ')}</strong> — safety-flagged for ${PROFILES[state.profile].label}`);
+  }
+  refreshAll();
+  // Re-render the active tab so its profile-aware content updates
+  const tab = document.body.dataset.activeTab;
+  if (tab === 'inspiration') renderInspiration();
+  if (tab === 'weekly')      renderWeeklyMenu();
+});
+
+document.getElementById('gluten-free-toggle').addEventListener('change', (e) => {
+  if (e.target.checked) state.restrictions.add('gluten');
+  else state.restrictions.delete('gluten');
+  const newlyBanned = [...state.selected].filter(id => getProfileBan(id));
+  newlyBanned.forEach(id => state.selected.delete(id));
+  if (newlyBanned.length) {
+    showToast(`Removed <strong>${newlyBanned.map(id => ID[id].name).join(', ')}</strong> — Gluten-free`);
+  }
+  refreshAll();
+});
+
+document.getElementById('plant-based-toggle').addEventListener('change', (e) => {
+  state.plantBased = e.target.checked;
+  renderMilkSelect();
+  renderYogurtSelect();
+  const newlyBanned = [...state.selected].filter(id => getProfileBan(id));
+  newlyBanned.forEach(id => state.selected.delete(id));
+  if (newlyBanned.length) {
+    showToast(`Removed <strong>${newlyBanned.map(id => ID[id].name).join(', ')}</strong> — contains animal products`);
+  }
+  refreshAll();
+});
+
+document.querySelectorAll('.restr-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const r = btn.dataset.restr;
+    if (state.restrictions.has(r)) state.restrictions.delete(r);
+    else state.restrictions.add(r);
+    btn.classList.toggle('active', state.restrictions.has(r));
+    renderMilkSelect();
+    renderYogurtSelect();
+    const newlyBanned = [...state.selected].filter(id => getProfileBan(id));
+    newlyBanned.forEach(id => state.selected.delete(id));
+    if (newlyBanned.length) {
+      showToast(`Removed <strong>${newlyBanned.map(id => ID[id].name).join(', ')}</strong> — ${ALLERGY_BANS[r].label}`);
+    }
+    refreshAll();
+  });
+});
+
+document.getElementById('milk-select').addEventListener('change', (e) => {
+  state.milk = e.target.value;
+  refreshMacroBar();
+});
+document.getElementById('yogurt-select').addEventListener('change', (e) => {
+  state.yogurt = e.target.value;
+  refreshMacroBar();
+});
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  // Full reset to factory defaults — profile, restrictions, milk, yogurt, mode, servings, toppings
+  state.profile = 'regular';
+  state.plantBased = false;
+  state.restrictions = new Set();
+  state.mode = 'freestyle';
+  state.milk = 'none';
+  state.yogurt = 'none';
+  state.servings = 1;
+  state.selected.clear();
+  // Sync UI controls
+  document.getElementById('profile-select').value = 'regular';
+  document.getElementById('plant-based-toggle').checked = false;
+  document.querySelectorAll('.restr-chip').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mode-toggle button').forEach(b => b.classList.toggle('active', b.dataset.mode === 'freestyle'));
+  renderMilkSelect();
+  renderYogurtSelect();
+  refreshAll();
+  showToast('Reset to defaults');
+});
+
+function findIdByName(name) {
+  const i = INGREDIENTS.find(x => x.name === name);
+  return i ? i.id : null;
+}
+function isStirIn(id) {
+  const stirIns = new Set([
+    'cinnamon','vanilla','matcha','turmeric_pep','cardamom','maca','spirulina','ginger','nutmeg','sea_salt','citrus_zest',
+    'cacao_powder','protein_powder','collagen','date_paste','honey','maple','almond_butter','peanut_butter','tahini','cashew_butter','coconut_cream',
+    'chia','flax','dates','figs_dried','cottage_cheese','extra_yogurt'
+  ]);
+  return stirIns.has(id);
+}
+function findSignaturePairs() {
+  const pairs = [];
+  const sel = [...state.selected];
+  for (let i = 0; i < sel.length; i++) {
+    for (let j = i + 1; j < sel.length; j++) {
+      if ((loveMap[sel[i]] || new Set()).has(sel[j])) {
+        pairs.push([ID[sel[i]].name, ID[sel[j]].name]);
+      }
+    }
+  }
+  return pairs;
+}
+function findClashPairs() {
+  const pairs = [];
+  const sel = [...state.selected];
+  for (let i = 0; i < sel.length; i++) {
+    for (let j = i + 1; j < sel.length; j++) {
+      if ((clashMap[sel[i]] || new Set()).has(sel[j])) {
+        pairs.push([ID[sel[i]].name, ID[sel[j]].name]);
+      }
+    }
+  }
+  return pairs;
+}
+
+function generateRecipe() {
+  const milk = MILK_DATA[state.milk];
+  const yog = YOGURT_DATA[state.yogurt];
+  const baseList = [...BASE_FIXED.map(b => ({ name: b.name, qty: b.qty, macros: b.macros }))];
+  if (state.milk !== 'none')   baseList.push({ name: milk.name, qty: '⅔ cup', macros: milk.macros });
+  if (state.yogurt !== 'none') baseList.push({ name: yog.name,  qty: '¼ cup', macros: yog.macros });
+  const toppings = [...state.selected].map(id => {
+    const i = ID[id];
+    return { name: i.name, qty: i.qty, macros: i.macros };
+  });
+  const totalsBase = computeTotals();
+  const totals = totalsBase.map(v => v * state.servings);
+  const sig = findSignaturePairs();
+  const clash = findClashPairs();
+
+  document.getElementById('rc-meta').textContent =
+    `Serves ${state.servings} · ${PROFILES[state.profile].label}${state.plantBased ? ' · Plant-based' : ''} · ~5 min prep · overnight set (≥6 hrs)`;
+
+  const ingUL = document.getElementById('rc-ingredients');
+  ingUL.innerHTML = '';
+  const addRow = (it) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="q">${qty(it.qty)}</span> · ${it.name}`;
+    ingUL.appendChild(li);
+  };
+  baseList.forEach(addRow);
+  toppings.forEach(addRow);
+  if (toppings.length === 0) {
+    const li = document.createElement('li');
+    li.style.color = 'var(--muted)';
+    li.textContent = '(no toppings selected — base only)';
+    ingUL.appendChild(li);
+  }
+
+  const steps = document.getElementById('rc-steps');
+  steps.innerHTML = '';
+  const liquidParts = [];
+  if (state.yogurt !== 'none') liquidParts.push(yog.name);
+  if (state.milk   !== 'none') liquidParts.push(milk.name);
+  const baseSteps = [];
+  if (liquidParts.length) {
+    baseSteps.push(`In a jar or container, combine rolled oats with ${liquidParts.join(' and ')}. Stir well.`);
+  } else {
+    baseSteps.push(`Place rolled oats in a jar or container.`);
+  }
+  const stirIn = toppings.filter(t => isStirIn(findIdByName(t.name)));
+  const morning = toppings.filter(t => !isStirIn(findIdByName(t.name)));
+  if (stirIn.length) baseSteps.push(`Stir in: ${stirIn.map(t => t.name.toLowerCase()).join(', ')}.`);
+  baseSteps.push(`Cover and refrigerate overnight (or at least 6 hours).`);
+  if (morning.length) baseSteps.push(`In the morning, top with: ${morning.map(t => t.name.toLowerCase()).join(', ')}.`);
+  baseSteps.push(`Eat cold, or warm gently if preferred.`);
+  baseSteps.forEach(s => {
+    const li = document.createElement('li');
+    li.textContent = s;
+    steps.appendChild(li);
+  });
+
+  // Why this works for you — base + milk + yogurt + toppings benefits
+  const benUL = document.getElementById('rc-benefits');
+  benUL.innerHTML = '';
+  const addBen = (name, benefit) => {
+    if (!benefit) return;
+    const li = document.createElement('li');
+    li.style.padding = '5px 0';
+    li.innerHTML = `<strong>${escapeHtml(name)}</strong> · <span style="color:var(--muted)">${escapeHtml(benefit)}</span>`;
+    benUL.appendChild(li);
+  };
+  BASE_FIXED.forEach(b => addBen(b.name.charAt(0).toUpperCase() + b.name.slice(1), b.benefit));
+  if (state.milk   !== 'none') addBen(milk.short, milk.benefit);
+  if (state.yogurt !== 'none') addBen(yog.short, yog.benefit);
+  toppings.forEach(t => {
+    const ing = INGREDIENTS.find(x => x.name === t.name);
+    if (ing) addBen(ing.name, ing.benefit);
+  });
+
+  const macWrap = document.getElementById('rc-macros');
+  macWrap.innerHTML = '';
+  const macLabels = ['kcal','protein','fat','carbs','fibre'];
+  const macUnits  = ['',    'g',     'g',  'g',    'g'];
+  macLabels.forEach((l, i) => {
+    const div = document.createElement('div');
+    div.className = 'macro';
+    div.innerHTML = `<span class="v">${Math.round(totals[i])}${macUnits[i] ? '<span style="font-size:11px;color:var(--muted)"> '+macUnits[i]+'</span>' : ''}</span><span class="l">${l}</span>`;
+    macWrap.appendChild(div);
+  });
+
+  const notes = document.getElementById('rc-pairing-notes');
+  notes.innerHTML = '';
+  if (sig.length) {
+    const div = document.createElement('div');
+    div.className = 'pairing';
+    div.innerHTML = `<strong>Why this works:</strong> signature pairings — ` +
+      sig.map(p => `${p[0]} + ${p[1]}`).join(' · ');
+    notes.appendChild(div);
+  }
+  if (clash.length) {
+    const div = document.createElement('div');
+    div.className = 'pairing warn';
+    div.innerHTML = `<strong>Heads up:</strong> ` +
+      clash.map(p => `${p[0]} + ${p[1]}`).join(' · ') + ` may not pair well — switch to Best Combo to filter.`;
+    notes.appendChild(div);
+  }
+
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal').setAttribute('aria-hidden', 'false');
+}
+
+document.getElementById('recipe-btn').addEventListener('click', generateRecipe);
+document.getElementById('close-modal').addEventListener('click', closeModal);
+document.getElementById('done-btn').addEventListener('click', closeModal);
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('modal').setAttribute('aria-hidden', 'true');
+}
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target.id === 'modal') closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+document.getElementById('print-btn').addEventListener('click', () => window.print());
+document.getElementById('copy-btn').addEventListener('click', async () => {
+  const milk = MILK_DATA[state.milk];
+  const yog = YOGURT_DATA[state.yogurt];
+  const baseList = [...BASE_FIXED.map(b => ({ name: b.name, qty: b.qty }))];
+  if (state.milk !== 'none')   baseList.push({ name: milk.name, qty: '⅔ cup' });
+  if (state.yogurt !== 'none') baseList.push({ name: yog.name,  qty: '¼ cup' });
+  const toppings = [...state.selected].map(id => ({ name: ID[id].name, qty: ID[id].qty }));
+  const lines = [];
+  lines.push('OVERNIGHT OATS');
+  lines.push(`${PROFILES[state.profile].label}${state.plantBased ? ' · Plant-based' : ''} · Serves ${state.servings}\n`);
+  lines.push('INGREDIENTS');
+  baseList.forEach(it => lines.push(`  • ${it.qty} ${it.name}`));
+  toppings.forEach(it => lines.push(`  • ${it.qty} ${it.name}`));
+  lines.push('\nMETHOD');
+  const liquidParts2 = [];
+  if (state.yogurt !== 'none') liquidParts2.push(yog.name);
+  if (state.milk   !== 'none') liquidParts2.push(milk.name);
+  lines.push(liquidParts2.length
+    ? `  1. Combine oats with ${liquidParts2.join(' and ')} in a jar; stir well.`
+    : `  1. Place oats in a jar.`);
+  const stirIn = toppings.filter(t => isStirIn(findIdByName(t.name)));
+  const morning = toppings.filter(t => !isStirIn(findIdByName(t.name)));
+  let n = 2;
+  if (stirIn.length) { lines.push(`  ${n}. Stir in: ${stirIn.map(t => t.name.toLowerCase()).join(', ')}.`); n++; }
+  lines.push(`  ${n}. Refrigerate overnight (≥6 hrs).`); n++;
+  if (morning.length) { lines.push(`  ${n}. Top with: ${morning.map(t => t.name.toLowerCase()).join(', ')}.`); }
+
+  try {
+    await navigator.clipboard.writeText(lines.join('\n'));
+    const btn = document.getElementById('copy-btn');
+    const old = btn.textContent;
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => btn.textContent = old, 1400);
+  } catch (e) {
+    alert('Could not copy — your browser blocked clipboard access.');
+  }
+});
+
+// ==============================================================
+// MY RECIPES — localStorage persistence
+// ==============================================================
+const RECIPES_KEY = 'oats-builder-recipes-v1';
+const RATING_LABEL = { loved: 'Loved', fine: 'Fine', skip: 'Skip' };
+const RATING_EMOJI = { loved: '🤤', fine: '👍', skip: '👎' };
+
+function loadRecipes() {
+  try {
+    const raw = localStorage.getItem(RECIPES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function persistRecipes(arr) {
+  try { localStorage.setItem(RECIPES_KEY, JSON.stringify(arr)); } catch {}
+}
+
+function suggestRecipeName() {
+  const sel = [...state.selected].slice(0, 3).map(id => ID[id].name);
+  if (!sel.length) return 'Plain base';
+  return sel.join(' + ');
+}
+
+function saveCurrentRecipe() {
+  closeModal(); // close the recipe card so it doesn't stack behind the name dialog
+  openNameModal(suggestRecipeName(), (name) => {
+    const all = loadRecipes();
+    const recipe = {
+      id: 'r_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      name,
+      profile: state.profile,
+      plantBased: state.plantBased,
+      restrictions: [...state.restrictions],
+      milk: state.milk,
+      yogurt: state.yogurt,
+      selected: [...state.selected],
+      servings: state.servings,
+      rating: null,
+      notes: '',
+      savedAt: Date.now(),
+    };
+    all.unshift(recipe);
+    persistRecipes(all);
+    refreshRecipesUI();
+    showToast(`Saved <strong>${escapeHtml(name)}</strong> to My Recipes`);
+  });
+}
+
+function openNameModal(defaultName, onSave) {
+  const modal = document.getElementById('name-modal');
+  const input = document.getElementById('name-input');
+  input.value = defaultName;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  setTimeout(() => { input.focus(); input.select(); }, 50);
+
+  const close = () => {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.getElementById('name-save').onclick = null;
+    document.getElementById('name-cancel').onclick = null;
+    document.getElementById('name-close').onclick = null;
+    input.onkeydown = null;
+  };
+  const submit = () => {
+    const v = input.value.trim();
+    if (!v) { input.focus(); return; }
+    close();
+    onSave(v);
+  };
+  document.getElementById('name-save').onclick = submit;
+  document.getElementById('name-cancel').onclick = close;
+  document.getElementById('name-close').onclick = close;
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); submit(); }
+    else if (e.key === 'Escape') { e.preventDefault(); close(); }
+  };
+}
+
+function openConfirmModal(message, onOk) {
+  const modal = document.getElementById('confirm-modal');
+  document.getElementById('confirm-text').textContent = message;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  const close = () => {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.getElementById('confirm-ok').onclick = null;
+    document.getElementById('confirm-cancel').onclick = null;
+  };
+  document.getElementById('confirm-ok').onclick = () => { close(); onOk(); };
+  document.getElementById('confirm-cancel').onclick = close;
+}
+
+function rateRecipe(id, rating) {
+  const all = loadRecipes();
+  const r = all.find(x => x.id === id);
+  if (!r) return;
+  r.rating = (r.rating === rating) ? null : rating;
+  persistRecipes(all);
+  refreshRecipesUI();
+}
+function deleteRecipe(id) {
+  const r = loadRecipes().find(x => x.id === id);
+  if (!r) return;
+  openConfirmModal(`"${r.name}" will be permanently removed.`, () => {
+    const all = loadRecipes().filter(x => x.id !== id);
+    persistRecipes(all);
+    refreshRecipesUI();
+    showToast(`Deleted <strong>${escapeHtml(r.name)}</strong>`);
+  });
+}
+
+function loadRecipeIntoBuilder(id) {
+  const r = loadRecipes().find(x => x.id === id);
+  if (!r) return;
+  state.profile = r.profile || 'regular';
+  state.plantBased = !!r.plantBased;
+  state.restrictions = new Set(r.restrictions || []);
+  state.milk = r.milk || 'none';
+  state.yogurt = r.yogurt || 'none';
+  state.selected = new Set(r.selected || []);
+  state.servings = r.servings || 1;
+  // Sync UI controls
+  document.getElementById('profile-select').value = state.profile;
+  document.getElementById('plant-based-toggle').checked = state.plantBased;
+  document.querySelectorAll('.restr-chip').forEach(b => {
+    b.classList.toggle('active', state.restrictions.has(b.dataset.restr));
+  });
+  document.getElementById('gluten-free-toggle').checked = state.restrictions.has('gluten');
+  renderMilkSelect();
+  renderYogurtSelect();
+  switchTab('builder');
+  refreshAll();
+  showToast(`Opened <strong>${escapeHtml(r.name)}</strong> — tweak and regenerate`);
+}
+
+// ----- Top 5 / quick load -----
+function getQuickLoad() {
+  const all = loadRecipes();
+  const loved = all.filter(r => r.rating === 'loved').sort((a,b) => b.savedAt - a.savedAt);
+  const fine  = all.filter(r => r.rating === 'fine').sort((a,b) => b.savedAt - a.savedAt);
+  return [...loved, ...fine].slice(0, 5);
+}
+function renderQuickLoad() {
+  const wrap = document.getElementById('quickload');
+  const tiles = document.getElementById('quickload-tiles');
+  const list = getQuickLoad();
+  if (!list.length) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = '';
+  tiles.innerHTML = '';
+  list.forEach(r => {
+    const summary = (r.selected || []).slice(0, 4).map(id => ID[id]?.name || id).join(', ') + ((r.selected || []).length > 4 ? '…' : '');
+    const t = document.createElement('button');
+    t.className = 'tile';
+    t.innerHTML = `
+      <div class="name">${escapeHtml(r.name)}</div>
+      <div class="meta">
+        <span class="rating-emoji">${RATING_EMOJI[r.rating] || ''}</span>
+        <span>${PROFILES[r.profile]?.label || r.profile}${r.plantBased ? ' · plant' : ''}</span>
+      </div>
+    `;
+    t.addEventListener('click', () => loadRecipeIntoBuilder(r.id));
+    t.title = summary;
+    tiles.appendChild(t);
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ----- My Recipes view -----
+function updateRecipeNotes(id, notes) {
+  const all = loadRecipes();
+  const r = all.find(x => x.id === id);
+  if (!r) return;
+  r.notes = notes;
+  persistRecipes(all);
+}
+
+function renderRecipesToolbar(all) {
+  const tb = document.getElementById('recipes-toolbar');
+  const chips = document.getElementById('recipes-filter-chips');
+  if (!all.length) { tb.style.display = 'none'; return; }
+  tb.style.display = '';
+  // Build profile filter chips from profiles in saved recipes
+  const profilesUsed = [...new Set(all.map(r => r.profile))];
+  chips.innerHTML = '';
+  const mkChip = (val, label) => {
+    const b = document.createElement('button');
+    b.className = 'filter-chip' + (state.recipesFilter === val ? ' active' : '');
+    b.textContent = label;
+    b.onclick = () => { state.recipesFilter = val; renderRecipesList(); };
+    return b;
+  };
+  chips.appendChild(mkChip('all', 'All'));
+  profilesUsed.forEach(p => chips.appendChild(mkChip(p, PROFILES[p]?.label || p)));
+  document.getElementById('recipes-sort').value = state.recipesSort;
+}
+
+function renderRecipesList() {
+  const root = document.getElementById('recipes-list');
+  const all = loadRecipes();
+  document.getElementById('recipes-count').textContent = all.length;
+  renderRecipesToolbar(all);
+
+  if (!all.length) {
+    root.innerHTML = `
+      <div class="empty-recipes">
+        <h3>No saved recipes yet</h3>
+        <p>Build a combo, hit <strong>Generate recipe card</strong>, then <strong>Save to My Recipes</strong>.</p>
+      </div>`;
+    return;
+  }
+
+  // Filter
+  let list = all;
+  if (state.recipesFilter !== 'all') {
+    list = list.filter(r => r.profile === state.recipesFilter);
+  }
+
+  // Sort
+  if (state.recipesSort === 'date') {
+    list = [...list].sort((a,b) => b.savedAt - a.savedAt);
+  } else if (state.recipesSort === 'profile') {
+    list = [...list].sort((a,b) =>
+      (PROFILES[a.profile]?.label || a.profile).localeCompare(PROFILES[b.profile]?.label || b.profile)
+      || (b.savedAt - a.savedAt)
+    );
+  } else if (state.recipesSort === 'name') {
+    list = [...list].sort((a,b) => a.name.localeCompare(b.name));
+  } else {
+    // rating: loved → fine → unrated → skip; ties by date desc
+    const order = { loved: 0, fine: 1, null: 2, undefined: 2, skip: 3 };
+    list = [...list].sort((a,b) => {
+      const oa = order[a.rating] ?? 2, ob = order[b.rating] ?? 2;
+      if (oa !== ob) return oa - ob;
+      return b.savedAt - a.savedAt;
+    });
+  }
+
+  if (!list.length) {
+    root.innerHTML = `<div class="empty-recipes"><h3>No matches</h3><p>No saved recipes for this filter.</p></div>`;
+    return;
+  }
+
+  root.innerHTML = '';
+  list.forEach(r => {
+    const summary = (r.selected || []).map(id => ID[id]?.name || id).join(' · ') || '(base only)';
+    const profileLabel = PROFILES[r.profile]?.label || r.profile;
+    const badges = [
+      `<span class="badge">${profileLabel}</span>`,
+      r.plantBased ? '<span class="badge">plant-based</span>' : '',
+      ...(r.restrictions || []).map(x => `<span class="badge">${ALLERGY_BANS[x]?.label || x}</span>`),
+    ].filter(Boolean).join(' ');
+
+    const row = document.createElement('div');
+    row.className = 'recipe-row';
+    row.innerHTML = `
+      <div class="info">
+        <div class="name">${escapeHtml(r.name)} <span class="badges">${badges}</span></div>
+        <div class="summary">${escapeHtml(summary)}</div>
+      </div>
+      <div class="rating-group">
+        <button class="rate-btn loved ${r.rating === 'loved' ? 'active' : ''}" data-rate="loved" data-id="${r.id}">🤤 Loved</button>
+        <button class="rate-btn fine  ${r.rating === 'fine'  ? 'active' : ''}" data-rate="fine"  data-id="${r.id}">👍 Fine</button>
+        <button class="rate-btn skip  ${r.rating === 'skip'  ? 'active' : ''}" data-rate="skip"  data-id="${r.id}">👎 Skip</button>
+      </div>
+      <div class="actions-inline">
+        <button data-action="load" data-id="${r.id}">Open</button>
+        <button class="danger" data-action="delete" data-id="${r.id}">Delete</button>
+      </div>
+      <div class="notes-row">
+        <span class="label">Notes</span>
+        <textarea class="notes-input" data-id="${r.id}" rows="1" placeholder="Add a note — e.g. 'too sweet', 'great post-run'…">${escapeHtml(r.notes || '')}</textarea>
+      </div>
+    `;
+    root.appendChild(row);
+  });
+
+  root.querySelectorAll('.rate-btn').forEach(b => {
+    b.addEventListener('click', () => rateRecipe(b.dataset.id, b.dataset.rate));
+  });
+  root.querySelectorAll('[data-action="load"]').forEach(b => {
+    b.addEventListener('click', () => loadRecipeIntoBuilder(b.dataset.id));
+  });
+  root.querySelectorAll('[data-action="delete"]').forEach(b => {
+    b.addEventListener('click', () => deleteRecipe(b.dataset.id));
+  });
+  root.querySelectorAll('.notes-input').forEach(t => {
+    // Auto-grow on input
+    const grow = () => {
+      t.style.height = 'auto';
+      t.style.height = (t.scrollHeight) + 'px';
+    };
+    grow();
+    t.addEventListener('input', grow);
+    t.addEventListener('blur', () => updateRecipeNotes(t.dataset.id, t.value.trim()));
+  });
+}
+
+function refreshRecipesUI() {
+  renderRecipesList();
+  renderQuickLoad();
+  refreshSoftWarning();
+}
+
+// ----- Soft warning for similar Skip-rated combos -----
+function refreshSoftWarning() {
+  const slot = document.getElementById('soft-warning-slot');
+  slot.innerHTML = '';
+  if (!state.selected.size) return;
+  const skipped = loadRecipes().filter(r => r.rating === 'skip');
+  if (!skipped.length) return;
+  const cur = state.selected;
+  for (const r of skipped) {
+    const sel = new Set(r.selected || []);
+    if (!sel.size) continue;
+    const intersection = [...cur].filter(x => sel.has(x)).length;
+    const union = new Set([...cur, ...sel]).size;
+    const jaccard = intersection / union;
+    if (jaccard >= 0.6) {
+      const div = document.createElement('div');
+      div.className = 'soft-warning';
+      div.innerHTML = `<strong>Heads up:</strong> you rated <em>${escapeHtml(r.name)}</em> as Skip — this combo is ${Math.round(jaccard*100)}% similar.`;
+      slot.appendChild(div);
+      break;
+    }
+  }
+}
+
+// ==============================================================
+// INSPIRATION — tried-and-tested starting recipes
+// ==============================================================
+const INSPIRATION = [
+  {
+    id: 'apple-pie',
+    name: 'Apple Pie',
+    description: 'Cinnamon-spiced classic. Diced apple, cinnamon, pecans, hint of nutmeg.',
+    profiles: ['regular','menopausal','athletic','pregnant','bloodsugar'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['apple','cinnamon','pecans','nutmeg'],
+    note: 'For an applesauce twist, stir 2 tbsp grated apple in overnight. Top with stewed cinnamon apples in the morning if you want a true crisp.',
+  },
+  {
+    id: 'pb-and-j',
+    name: 'PB&J',
+    description: 'Childhood flavours, grown-up macros. Strawberries, raspberries, peanut butter.',
+    profiles: ['regular','menopausal','athletic','pregnant','bloodsugar'],
+    milk: 'full_fat',
+    yogurt: 'greek_full',
+    selected: ['peanut_butter','strawberries','raspberries','chia'],
+    note: 'For chia jam: stir 1 tbsp chia with ¼ cup mashed berries the night before. Peanut allergy: swap PB for almond butter.',
+  },
+  {
+    id: 'choc-banana-bread',
+    name: 'Chocolate Banana Bread',
+    description: 'Cocoa, banana, walnuts and a hint of nutmeg. Brain-friendly omega-3 from walnuts.',
+    profiles: ['regular','menopausal','athletic','pregnant'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['cacao_powder','banana','cinnamon','nutmeg','walnuts','dark_chocolate'],
+    note: 'For blood-sugar focused: use cacao nibs instead of dark chocolate to cut added sugar.',
+  },
+
+  {
+    id: 'cherry-berry',
+    name: 'Cherry Berry with Chia & Yogurt',
+    description: 'Antioxidant-rich classic. Tart cherries and blueberries with Greek yogurt and chia. Use frozen fruit in winter.',
+    profiles: ['regular','menopausal','athletic','pregnant','bloodsugar'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['cherries','blueberries','chia','maple'],
+    note: 'Skip the maple if you are blood-sugar focused — the fruit is plenty sweet.',
+  },
+  {
+    id: 'coconut-turmeric',
+    name: 'Coconut Turmeric',
+    description: 'Anti-inflammatory bowl. Coconut milk base stirred with turmeric and cinnamon, topped with mango, hemp and coconut flakes.',
+    profiles: ['regular','menopausal','pregnant'],
+    milk: 'coconut',
+    yogurt: 'none',
+    selected: ['turmeric_pep','cinnamon','mango','hemp','coconut_flakes','dates'],
+    note: 'Original calls for dried currants — dates or goji berries work as substitute.',
+  },
+  {
+    id: 'sesame-tahini',
+    name: 'Sweet Sesame Tahini',
+    description: 'Mediterranean-leaning bowl. Tahini, pomegranate seeds, pistachios and sesame.',
+    profiles: ['regular','menopausal','athletic','pregnant','bloodsugar'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['tahini','pomegranate','pistachios','sesame','figs_dried','honey'],
+    note: 'Substitute dried apricots → figs. Sesame allergy: skip tahini and sesame seeds.',
+  },
+  {
+    id: 'choc-chip-cookie',
+    name: 'Chocolate Chip Cookie',
+    description: 'Kid- and partner-friendly. Vanilla, almond butter, dark chocolate and chopped almonds.',
+    profiles: ['regular','menopausal','athletic','pregnant'],
+    milk: 'full_fat',
+    yogurt: 'greek_full',
+    selected: ['vanilla','almond_butter','dark_chocolate','almonds'],
+    note: 'Swap almond butter for peanut butter if you prefer. Use cacao nibs instead of dark chocolate to keep added sugar low.',
+  },
+
+  {
+    id: 'peach-crisp',
+    name: 'Peach Crisp',
+    description: 'Summer fruit with creamy yogurt and a granola crunch.',
+    profiles: ['regular','menopausal','athletic','pregnant'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['peach','granola'],
+    note: 'Gluten-free? Use certified GF granola.',
+  },
+
+
+
+  // ---- Menopausal ----
+  {
+    id: 'meno-phyto',
+    name: 'Phyto-Power Bowl',
+    description: 'Lignan- and isoflavone-rich for hormonal balance. Soy milk + soy yogurt with flax, sesame, walnuts and berries.',
+    profiles: ['menopausal','pregnant','regular'],
+    milk: 'soy',
+    yogurt: 'soy_yog',
+    selected: ['flax','sesame','walnuts','blueberries','raspberries','cardamom'],
+    note: 'Soy allergy: swap to oat milk + Greek 0% — you keep the lignans and omega-3 from flax/sesame/walnuts.',
+  },
+  {
+    id: 'meno-bone',
+    name: 'Bone & Beauty',
+    description: 'Calcium, magnesium and antioxidants for bone density and skin. Skyr, sesame, pumpkin seeds, figs and a hint of cacao.',
+    profiles: ['menopausal','pregnant','regular'],
+    milk: 'oat',
+    yogurt: 'skyr',
+    selected: ['sesame','pumpkin','figs_dried','cinnamon','cacao_nibs','almonds'],
+    note: 'Cacao nibs add magnesium without sugar.',
+  },
+
+  // ---- Athletic ----
+  {
+    id: 'athletic-pre',
+    name: 'Pre-Training Fuel',
+    description: 'Fast carbs and easy protein 60–90 min before a workout. Banana, dates, PB and cinnamon over Greek full-fat.',
+    profiles: ['athletic','regular'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['banana','dates','peanut_butter','cinnamon','chia'],
+    note: 'Long sessions: double the dates. After training: see Recovery Bowl.',
+  },
+  {
+    id: 'athletic-recovery',
+    name: 'Recovery Bowl',
+    description: 'High-protein post-workout reload. Cottage cheese + a scoop of protein, blueberries for antioxidants, hemp and cacao nibs.',
+    profiles: ['athletic'],
+    milk: 'skimmed',
+    yogurt: 'cottage',
+    selected: ['protein_powder','blueberries','hemp','cacao_nibs','almonds'],
+    note: '~35–40g protein. Eat within 60 min of training for best glycogen restock.',
+  },
+
+  // ---- Pregnant ----
+  {
+    id: 'pregnant-iron',
+    name: 'Iron-Rich Bowl',
+    description: 'Iron and magnesium — walnuts, pumpkin seeds, dark chocolate, dates. Walnuts add omega-3 ALA for foetal brain development.',
+    profiles: ['pregnant','menopausal'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['walnuts','pumpkin','dark_chocolate','dates','cinnamon','chia'],
+    note: 'Pair with vitamin C (citrus zest or berries on the side) to boost iron absorption.',
+  },
+  {
+    id: 'pregnant-calcium',
+    name: 'Calcium & Folate',
+    description: 'Calcium-dense bowl with sesame, almonds, figs. Skyr brings the highest dairy protein per spoon.',
+    profiles: ['pregnant','menopausal','regular'],
+    milk: 'full_fat',
+    yogurt: 'skyr',
+    selected: ['sesame','almonds','figs_dried','cardamom','flax'],
+    note: 'No spirulina, maca, bee pollen or goji — all flagged for pregnancy.',
+  },
+
+  // ---- Blood-sugar focused ----
+  {
+    id: 'bs-protein-berry',
+    name: 'High-Protein Berry Bowl',
+    description: 'Low-GI berries with slow-release casein, walnuts and chia. Cinnamon helps blunt glucose response.',
+    profiles: ['bloodsugar','athletic','regular'],
+    milk: 'skimmed',
+    yogurt: 'skyr',
+    selected: ['raspberries','blueberries','walnuts','chia','cinnamon'],
+    note: 'Skyr keeps it rich without needing sweeteners.',
+  },
+  {
+    id: 'bs-savoury',
+    name: 'Savoury Skyr',
+    description: 'No fruit, no sugar — protein, fat and minerals only. For days when you need to anchor blood sugar from the start.',
+    profiles: ['bloodsugar'],
+    milk: 'oat',
+    yogurt: 'skyr',
+    selected: ['hemp','pumpkin','sesame','cinnamon','sea_salt'],
+    note: 'Unusual but works. Salt and hemp give a savoury edge that holds you for hours.',
+  },
+  // ---- Postpartum ----
+  {
+    id: 'postpartum-milk-boost',
+    name: 'Milk-Boost Bowl',
+    description: 'Galactagogue oats + iron-rich combo for breastfeeding recovery. Walnuts, flax and dates for omega-3 and energy.',
+    profiles: ['postpartum','pregnant'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['walnuts','flax','dates','dark_chocolate','cinnamon','chia'],
+    note: 'Oats themselves help support milk supply. Pair with plenty of water.',
+  },
+  {
+    id: 'postpartum-recovery',
+    name: 'New Mum Recovery',
+    description: 'Calcium, iron, and slow-release protein for the first months after birth.',
+    profiles: ['postpartum','menopausal'],
+    milk: 'full_fat',
+    yogurt: 'skyr',
+    selected: ['almonds','sesame','dates','cinnamon','flax'],
+    note: 'Skyr brings the densest protein per spoon — useful through night feeds.',
+  },
+
+  // ---- Anti-inflammatory ----
+  {
+    id: 'antiinflam-golden',
+    name: 'Golden Bowl',
+    description: 'Anti-inflammatory powerhouse — turmeric and ginger with polyphenol-rich blueberries and walnuts.',
+    profiles: ['antiinflam','menopausal','ageing'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['turmeric_pep','ginger','blueberries','walnuts','cinnamon','chia'],
+    note: 'Black pepper helps curcumin absorption. The greek yogurt buffers the spice.',
+  },
+  {
+    id: 'antiinflam-cherry-cocoa',
+    name: 'Cherry Cocoa',
+    description: 'Tart cherries and dark cocoa — both shown to reduce inflammation markers. Plus walnuts for omega-3.',
+    profiles: ['antiinflam','menopausal','ageing'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['cherries','cacao_powder','walnuts','chia','cinnamon'],
+    note: 'Cherries also support sleep — works as an evening jar too.',
+  },
+
+  // ---- Healthy ageing 60+ ----
+  {
+    id: 'ageing-bone-builder',
+    name: 'Bone Builder',
+    description: 'Calcium-dense bowl with sesame, almonds, figs. Full-fat dairy for fat-soluble vitamin absorption.',
+    profiles: ['ageing','menopausal','pregnant'],
+    milk: 'full_fat',
+    yogurt: 'greek_full',
+    selected: ['sesame','almonds','figs_dried','cinnamon','flax'],
+    note: 'Vitamin D from sunshine + this calcium combo supports bone density.',
+  },
+  {
+    id: 'ageing-brain-bowl',
+    name: 'Brain Bowl',
+    description: 'Cognition-supporting combo: blueberries, walnuts, dark chocolate. All shown in studies to support ageing brain.',
+    profiles: ['ageing','antiinflam'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['blueberries','walnuts','dark_chocolate','cinnamon','flax'],
+    note: 'Cinnamon may further support cognitive function.',
+  },
+
+  // ---- Weight loss ----
+  {
+    id: 'weightloss-lean-berry',
+    name: 'Lean Berry Bowl',
+    description: 'High volume, low calorie. Berries for fibre, skyr for protein, no added sugars.',
+    profiles: ['weightloss','bloodsugar'],
+    milk: 'skimmed',
+    yogurt: 'skyr',
+    selected: ['raspberries','blueberries','chia','cinnamon'],
+    note: '~270 kcal with 22g protein — very satisfying for the calories.',
+  },
+  {
+    id: 'weightloss-protein-cup',
+    name: 'Protein Cottage Cup',
+    description: 'Cottage cheese plus a scoop of protein. Hits 30g+ protein for under 300 kcal.',
+    profiles: ['weightloss','muscle'],
+    milk: 'skimmed',
+    yogurt: 'cottage',
+    selected: ['protein_powder','strawberries','cinnamon','chia'],
+    note: 'Slow-release protein keeps you full till lunch.',
+  },
+
+  // ---- Muscle building ----
+  {
+    id: 'muscle-bulker',
+    name: "Bulker's Bowl",
+    description: 'Calorie- and protein-dense for surplus building. ~600 kcal, 40g protein.',
+    profiles: ['muscle','athletic'],
+    milk: 'full_fat',
+    yogurt: 'greek_full',
+    selected: ['protein_powder','peanut_butter','banana','dates','walnuts','chia'],
+    note: 'Heavy meal — best post-training or first thing on a hard training day.',
+  },
+  {
+    id: 'muscle-recovery-stack',
+    name: 'Recovery Stack',
+    description: 'Recovery-focused: cottage cheese + whey + carbs. Replenishes glycogen and starts protein synthesis.',
+    profiles: ['muscle','athletic'],
+    milk: 'full_fat',
+    yogurt: 'cottage',
+    selected: ['protein_powder','banana','peanut_butter','cacao_nibs','chia'],
+    note: 'Eat within 60 min of training for best recovery.',
+  },
+  // ---- Perimenopausal ----
+  {
+    id: 'peri-mood-magnesium',
+    name: 'Mood & Magnesium Bowl',
+    description: 'Magnesium-heavy combo for sleep, mood, and PMS support during the perimenopausal years.',
+    profiles: ['perimenopausal','menopausal'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['pumpkin','almonds','dark_chocolate','cacao_nibs','cinnamon','chia'],
+    note: 'Magnesium from pumpkin seeds, almonds and cacao supports sleep and reduces irritability.',
+  },
+  {
+    id: 'peri-iron-energy',
+    name: 'Iron & Energy',
+    description: 'Iron and B-vitamin support for heavier or irregular cycles. Slow-release carbs for stable energy.',
+    profiles: ['perimenopausal','postpartum','menopausal'],
+    milk: 'oat',
+    yogurt: 'greek_full',
+    selected: ['pumpkin','sesame','dates','walnuts','cinnamon','flax'],
+    note: 'Pair with vitamin C (citrus zest or berries on the side) to boost iron absorption.',
+  },
+];
+
+function renderInspiration() {
+  const profile = state.profile;
+  document.getElementById('insp-profile-label').textContent = PROFILES[profile].label;
+  const grid = document.getElementById('insp-grid');
+  grid.innerHTML = '';
+
+  // Sort: matching profile first, then others
+  const sorted = [...INSPIRATION].sort((a, b) => {
+    const aMatch = a.profiles.includes(profile) ? 0 : 1;
+    const bMatch = b.profiles.includes(profile) ? 0 : 1;
+    return aMatch - bMatch;
+  });
+
+  sorted.forEach(r => {
+    const matches = r.profiles.includes(profile);
+    const card = document.createElement('div');
+    card.className = 'insp-card' + (matches ? ' matched' : '');
+
+    // Build profile tags
+    const tagsHtml = r.profiles.map(p => {
+      const isCur = p === profile;
+      return '<span class="tag' + (isCur ? ' match' : '') + '">' + escapeHtml(PROFILES[p].label) + '</span>';
+    }).join('');
+
+    // Build ingredients summary (base + toppings)
+    const baseParts = [];
+    if (r.milk && r.milk !== 'none' && MILK_DATA[r.milk]) baseParts.push(MILK_DATA[r.milk].short + ' milk');
+    if (r.yogurt && r.yogurt !== 'none' && YOGURT_DATA[r.yogurt]) baseParts.push(YOGURT_DATA[r.yogurt].short);
+    const toppingNames = r.selected.map(id => (ID[id] && ID[id].name) || '').filter(Boolean).join(', ');
+    const ingsHtml = '<strong>Base:</strong> oats' + (baseParts.length ? ' + ' + baseParts.join(' + ') : '') + '<br><strong>Toppings:</strong> ' + escapeHtml(toppingNames);
+
+    card.innerHTML =
+      '<div class="name">' + escapeHtml(r.name) + '</div>' +
+      '<div class="desc">' + escapeHtml(r.description) + '</div>' +
+      '<div class="tags">' + tagsHtml + '</div>' +
+      '<div class="ings">' + ingsHtml + '</div>' +
+      (r.note ? '<div class="note">' + escapeHtml(r.note) + '</div>' : '') +
+      '<div class="row">' +
+        '<button class="primary" data-action="open" data-id="' + r.id + '">Open in builder</button>' +
+        '<button data-action="save" data-id="' + r.id + '">Save</button>' +
+        '<button data-action="shop" data-id="' + r.id + '">+ Shop</button>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('[data-action="open"]').forEach(b => {
+    b.addEventListener('click', () => openInspiration(b.dataset.id));
+  });
+  grid.querySelectorAll('[data-action="save"]').forEach(b => {
+    b.addEventListener('click', () => saveInspiration(b.dataset.id));
+  });
+  grid.querySelectorAll('[data-action="shop"]').forEach(b => {
+    b.addEventListener('click', () => {
+      const r = INSPIRATION.find(x => x.id === b.dataset.id);
+      if (!r) return;
+      const added = addRecipeToShopping(r.milk, r.yogurt, r.selected, 'inspiration');
+      showToast(added > 0 ? 'Added <strong>' + added + '</strong> from <em>' + escapeHtml(r.name) + '</em>' : 'Already on your list');
+    });
+  });
+}
+
+function openInspiration(id) {
+  const r = INSPIRATION.find(x => x.id === id);
+  if (!r) return;
+  state.milk = r.milk || 'none';
+  state.yogurt = r.yogurt || 'none';
+  state.selected = new Set(r.selected || []);
+  renderMilkSelect();
+  renderYogurtSelect();
+  switchTab('builder');
+  refreshAll();
+  showToast('Opened <strong>' + escapeHtml(r.name) + '</strong> in the builder');
+}
+
+function saveInspiration(id) {
+  const r = INSPIRATION.find(x => x.id === id);
+  if (!r) return;
+  const all = loadRecipes();
+  const recipe = {
+    id: 'r_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    name: r.name,
+    profile: state.profile,
+    plantBased: state.plantBased,
+    restrictions: [...state.restrictions],
+    milk: r.milk || 'none',
+    yogurt: r.yogurt || 'none',
+    selected: [...(r.selected || [])],
+    servings: 1,
+    rating: null,
+    notes: r.note || '',
+    savedAt: Date.now(),
+  };
+  all.unshift(recipe);
+  persistRecipes(all);
+  refreshRecipesUI();
+  showToast('Saved <strong>' + escapeHtml(r.name) + '</strong> to My Recipes');
+}
+
+// ==============================================================
+// SHOPPING LIST
+// ==============================================================
+const SHOPPING_KEY = 'oats-builder-shopping-v1';
+state.shopping = []; // [{id, source, ticked, oatsServings, milkKey, yogKey}]
+
+function loadShopping() {
+  try {
+    const raw = localStorage.getItem(SHOPPING_KEY);
+    state.shopping = raw ? JSON.parse(raw) : [];
+  } catch (e) { state.shopping = []; }
+}
+function persistShopping() {
+  try { localStorage.setItem(SHOPPING_KEY, JSON.stringify(state.shopping)); } catch (e) {}
+}
+
+// Add an array of ingredient ids (with optional milk/yogurt key prefixes) to shopping list
+function addToShopping(ids, source) {
+  let added = 0;
+  ids.forEach(id => {
+    if (!state.shopping.some(it => it.id === id)) {
+      state.shopping.push({ id, source: source || 'manual', ticked: false });
+      added++;
+    }
+  });
+  persistShopping();
+  updateShoppingCount();
+  return added;
+}
+
+function addRecipeToShopping(milk, yogurt, selected, source) {
+  const ids = [];
+  if (milk && milk !== 'none') ids.push('milk:' + milk);
+  if (yogurt && yogurt !== 'none') ids.push('yog:' + yogurt);
+  (selected || []).forEach(id => ids.push(id));
+  // Also add oats marker so it appears once on the list (deduped)
+  ids.push('base:oats');
+  return addToShopping(ids, source);
+}
+
+function syncShoppingFromWeekly() {
+  const menu = loadWeeklyMenu();
+  if (!menu) return 0;
+  const before = state.shopping.length;
+  // Remove all items previously sourced from weekly
+  state.shopping = state.shopping.filter(it => it.source !== 'weekly');
+  // Aggregate from days
+  const all = new Set();
+  menu.days.forEach(d => {
+    if (d.milk && d.milk !== 'none') all.add('milk:' + d.milk);
+    if (d.yogurt && d.yogurt !== 'none') all.add('yog:' + d.yogurt);
+    (d.selected || []).forEach(id => all.add(id));
+  });
+  all.add('base:oats');
+  all.forEach(id => {
+    if (!state.shopping.some(it => it.id === id)) {
+      state.shopping.push({ id, source: 'weekly', ticked: false });
+    }
+  });
+  persistShopping();
+  return state.shopping.length - before;
+}
+
+function toggleShoppingTicked(id) {
+  const it = state.shopping.find(x => x.id === id);
+  if (!it) return;
+  it.ticked = !it.ticked;
+  persistShopping();
+  renderShoppingTab();
+}
+
+function removeShoppingItem(id) {
+  state.shopping = state.shopping.filter(x => x.id !== id);
+  persistShopping();
+  renderShoppingTab();
+}
+
+function updateShoppingCount() {
+  const el = document.getElementById('shopping-count');
+  if (el) el.textContent = state.shopping.filter(it => !it.ticked).length;
+}
+
+function nameForShoppingId(id) {
+  if (id === 'base:oats') return { name: 'Rolled oats', qty: qty('½ cup') + ' per jar', cat: 'Base & liquid' };
+  if (id.startsWith('milk:')) {
+    const k = id.slice(5);
+    const v = MILK_DATA[k];
+    return v ? { name: v.short + ' milk', qty: qty('⅔ cup') + ' per jar', cat: 'Base & liquid' } : null;
+  }
+  if (id.startsWith('yog:')) {
+    const k = id.slice(4);
+    const v = YOGURT_DATA[k];
+    return v ? { name: v.short, qty: qty('¼ cup') + ' per jar', cat: 'Base & liquid' } : null;
+  }
+  const ing = ID[id];
+  return ing ? { name: ing.name, qty: qty(ing.qty) + ' per jar', cat: ing.cat } : null;
+}
+
+function renderShoppingTab() {
+  const root = document.getElementById('shop-content');
+  if (!state.shopping.length) {
+    root.innerHTML = '<div class="shop-empty">Your shopping list is empty. Generate a Weekly Menu, or add items from the Builder/Inspiration cards.</div>';
+    updateShoppingCount();
+    return;
+  }
+
+  // Group by category
+  const groups = {};
+  state.shopping.forEach(it => {
+    const meta = nameForShoppingId(it.id);
+    if (!meta) return;
+    if (!groups[meta.cat]) groups[meta.cat] = [];
+    groups[meta.cat].push({ ...it, meta });
+  });
+
+  const order = ['Base & liquid', 'Fruit', 'Nuts', 'Seeds', 'Protein & dairy', 'Butters & fats', 'Sweeteners', 'Extras & superfoods', 'Spices & powders'];
+  root.innerHTML = '';
+  order.forEach(cat => {
+    if (!groups[cat]) return;
+    const group = document.createElement('div');
+    group.className = 'shop-group';
+    group.innerHTML = '<h3>' + escapeHtml(cat) + '</h3>';
+    const ul = document.createElement('ul');
+    ul.className = 'shop-list';
+    groups[cat].forEach(it => {
+      const inPantry = state.pantry.has(it.id);
+      const li = document.createElement('li');
+      li.className = 'shop-item' + (it.ticked ? ' ticked' : '');
+      li.innerHTML =
+        '<span class="check" data-id="' + escapeHtml(it.id) + '">' + (it.ticked ? '✓' : '') + '</span>' +
+        '<span class="name">' + escapeHtml(it.meta.name) + '</span>' +
+        (inPantry ? '<span class="have">✓ have</span>' : '') +
+        '<span class="qty">' + escapeHtml(it.meta.qty) + '</span>' +
+        '<span class="src">' + escapeHtml(it.source) + '</span>' +
+        '<button class="remove" data-id="' + escapeHtml(it.id) + '" title="Remove">×</button>';
+      ul.appendChild(li);
+    });
+    group.appendChild(ul);
+    root.appendChild(group);
+  });
+
+  root.querySelectorAll('.check').forEach(b => {
+    b.addEventListener('click', () => toggleShoppingTicked(b.dataset.id));
+  });
+  root.querySelectorAll('.remove').forEach(b => {
+    b.addEventListener('click', () => removeShoppingItem(b.dataset.id));
+  });
+  updateShoppingCount();
+}
+
+// ==============================================================
+// PANTRY
+// ==============================================================
+const PANTRY_KEY = 'oats-builder-pantry-v1';
+state.pantry = new Set();
+state.suggestions = [];
+
+function loadPantry() {
+  try {
+    const raw = localStorage.getItem(PANTRY_KEY);
+    if (raw) state.pantry = new Set(JSON.parse(raw));
+  } catch (e) {}
+}
+function persistPantry() {
+  try { localStorage.setItem(PANTRY_KEY, JSON.stringify([...state.pantry])); } catch (e) {}
+}
+
+function togglePantryItem(id) {
+  if (state.pantry.has(id)) state.pantry.delete(id);
+  else state.pantry.add(id);
+  persistPantry();
+  renderPantryGrid();
+}
+
+function renderPantryGrid() {
+  const root = document.getElementById('pantry-grid');
+  root.innerHTML = '';
+
+  // Milks section
+  const milkSection = document.createElement('div');
+  milkSection.className = 'cat';
+  milkSection.innerHTML = '<div class="cat-head"><span class="cat-name">Milks (base)</span></div>';
+  const milkChips = document.createElement('div');
+  milkChips.className = 'chips';
+  Object.entries(MILK_DATA).forEach(([k, v]) => {
+    if (k === 'none' || !isMilkAllowed(k)) return;
+    const id = 'milk:' + k;
+    const b = document.createElement('button');
+    b.className = 'chip' + (state.pantry.has(id) ? ' selected' : '');
+    b.textContent = v.short;
+    b.title = v.benefit || '';
+    b.addEventListener('click', () => togglePantryItem(id));
+    milkChips.appendChild(b);
+  });
+  milkSection.appendChild(milkChips);
+  root.appendChild(milkSection);
+
+  // Yogurts section
+  const yogSection = document.createElement('div');
+  yogSection.className = 'cat';
+  yogSection.innerHTML = '<div class="cat-head"><span class="cat-name">Yogurts (base)</span></div>';
+  const yogChips = document.createElement('div');
+  yogChips.className = 'chips';
+  Object.entries(YOGURT_DATA).forEach(([k, v]) => {
+    if (k === 'none' || !isYogurtAllowed(k)) return;
+    const id = 'yog:' + k;
+    const b = document.createElement('button');
+    b.className = 'chip' + (state.pantry.has(id) ? ' selected' : '');
+    b.textContent = v.short;
+    b.title = v.benefit || '';
+    b.addEventListener('click', () => togglePantryItem(id));
+    yogChips.appendChild(b);
+  });
+  yogSection.appendChild(yogChips);
+  root.appendChild(yogSection);
+
+  // Toppings by category
+  CATS_ORDER.forEach(cat => {
+    const items = INGREDIENTS.filter(i => i.cat === cat);
+    if (!items.length) return;
+    const section = document.createElement('div');
+    section.className = 'cat';
+    section.innerHTML = '<div class="cat-head"><span class="cat-name">' + escapeHtml(cat) + '</span></div>';
+    const chips = document.createElement('div');
+    chips.className = 'chips';
+    items.forEach(i => {
+      const b = document.createElement('button');
+      b.className = 'chip' + (state.pantry.has(i.id) ? ' selected' : '');
+      b.dataset.id = i.id;
+      b.textContent = i.name;
+      b.title = qty(i.qty) + ' · ' + i.benefit;
+      b.addEventListener('click', () => togglePantryItem(i.id));
+      chips.appendChild(b);
+    });
+    section.appendChild(chips);
+    root.appendChild(section);
+  });
+  document.getElementById('pantry-count').textContent = state.pantry.size + (state.pantry.size === 1 ? ' item' : ' items');
+}
+
+function generateSuggestions() {
+  const allowedIds = [...state.pantry].filter(id => !getProfileBan(id) && ID[id]);
+  const out = document.getElementById('suggestion-output');
+  out.innerHTML = '';
+
+  if (allowedIds.length < 4) {
+    out.innerHTML = '<div class="pantry-empty">Add at least 4 ingredients (after profile filtering) to see suggestions.</div>';
+    return;
+  }
+  const allowedSet = new Set(allowedIds);
+
+  // Anchor candidates: items with at least one love-pair available in pantry
+  const anchors = allowedIds.filter(id => {
+    const loves = loveMap[id] || new Set();
+    return [...loves].some(l => allowedSet.has(l));
+  });
+
+  if (!anchors.length) {
+    out.innerHTML = '<div class="pantry-empty">Pantry has ingredients but no signature pairings between them. Try adding more variety — e.g. a butter, a fruit, and a spice.</div>';
+    return;
+  }
+
+  // Shuffle for variety
+  const shuffled = [...anchors].sort(() => Math.random() - 0.5);
+  const usedCatAnchors = new Set();
+  const usedKeys = new Set();
+  const combos = [];
+
+  for (const anchor of shuffled) {
+    if (combos.length >= 5) break;
+    const aCat = ID[anchor].cat;
+    if (usedCatAnchors.has(aCat)) continue;
+    usedCatAnchors.add(aCat);
+
+    const combo = new Set([anchor]);
+
+    // Add compatible love-paired items
+    const loves = [...(loveMap[anchor] || new Set())].filter(l => allowedSet.has(l));
+    loves.sort(() => Math.random() - 0.5);
+    for (const l of loves) {
+      const clashes = [...combo].some(c => (clashMap[l] || new Set()).has(c));
+      if (!clashes) combo.add(l);
+      if (combo.size >= 5) break;
+    }
+
+    // Try to fill in missing categories (Fruit, Spices) for balance
+    const presentCats = new Set([...combo].map(id => ID[id].cat));
+    ['Fruit', 'Spices & powders'].forEach(c => {
+      if (presentCats.has(c) || combo.size >= 6) return;
+      const candidates = allowedIds.filter(id =>
+        ID[id].cat === c &&
+        !combo.has(id) &&
+        ![...combo].some(x => (clashMap[id] || new Set()).has(x))
+      );
+      if (candidates.length) {
+        combo.add(candidates[Math.floor(Math.random() * candidates.length)]);
+      }
+    });
+
+    if (combo.size >= 3) {
+      const key = [...combo].sort().join(',');
+      if (!usedKeys.has(key)) {
+        usedKeys.add(key);
+        combos.push([...combo]);
+      }
+    }
+  }
+
+  if (!combos.length) {
+    out.innerHTML = '<div class="pantry-empty">Couldn\'t build clean combos from this pantry. Try adding more variety.</div>';
+    return;
+  }
+
+  // Pick milk/yogurt: prefer pantry items if set, else state.milk/yogurt, else profile-aware defaults
+  const pantryMilks = [...state.pantry].filter(id => id.startsWith('milk:')).map(id => id.slice(5)).filter(k => isMilkAllowed(k));
+  const pantryYogs  = [...state.pantry].filter(id => id.startsWith('yog:')).map(id => id.slice(4)).filter(k => isYogurtAllowed(k));
+
+  let defaultMilk = pantryMilks[0] || state.milk;
+  if (!defaultMilk || defaultMilk === 'none' || !isMilkAllowed(defaultMilk)) {
+    defaultMilk = state.plantBased ? 'oat' : 'full_fat';
+    if (!isMilkAllowed(defaultMilk)) defaultMilk = 'none';
+  }
+  let defaultYog = pantryYogs[0] || state.yogurt;
+  if (!defaultYog || defaultYog === 'none' || !isYogurtAllowed(defaultYog)) {
+    defaultYog = state.plantBased ? 'soy_yog' : 'greek_full';
+    if (!isYogurtAllowed(defaultYog)) defaultYog = 'none';
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'suggestion-grid';
+
+  combos.forEach((selectedIds, i) => {
+    const name = selectedIds.slice(0, 3).map(id => ID[id].name).join(' + ');
+    const ings = selectedIds.map(id => ID[id].name).join(', ');
+
+    // Compute macros
+    const milk = MILK_DATA[defaultMilk];
+    const yog = YOGURT_DATA[defaultYog];
+    let totals = [0,0,0,0,0];
+    BASE_FIXED.forEach(b => totals = totals.map((v,j) => v + b.macros[j]));
+    totals = totals.map((v,j) => v + milk.macros[j] + yog.macros[j]);
+    selectedIds.forEach(id => {
+      const ing = ID[id];
+      if (ing) totals = totals.map((v,j) => v + ing.macros[j]);
+    });
+
+    const card = document.createElement('div');
+    card.className = 'suggestion-card';
+    card.innerHTML =
+      '<div class="name">' + escapeHtml(name) + '</div>' +
+      '<div class="ings">' + escapeHtml(ings) + '</div>' +
+      '<div class="macros">' + Math.round(totals[0]) + ' kcal · ' + Math.round(totals[1]) + 'g protein</div>' +
+      '<div class="row">' +
+        '<button class="primary" data-action="open" data-idx="' + i + '">Open in builder</button>' +
+        '<button data-action="save" data-idx="' + i + '">Save</button>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+
+  out.appendChild(grid);
+  // Stash for handlers
+  state.suggestions = combos.map(ids => ({ selected: ids, milk: defaultMilk, yogurt: defaultYog }));
+
+  out.querySelectorAll('[data-action="open"]').forEach(b => {
+    b.addEventListener('click', () => openSuggestion(parseInt(b.dataset.idx, 10)));
+  });
+  out.querySelectorAll('[data-action="save"]').forEach(b => {
+    b.addEventListener('click', () => saveSuggestion(parseInt(b.dataset.idx, 10)));
+  });
+}
+
+function openSuggestion(idx) {
+  const s = state.suggestions[idx];
+  if (!s) return;
+  state.milk = s.milk;
+  state.yogurt = s.yogurt;
+  state.selected = new Set(s.selected);
+  renderMilkSelect();
+  renderYogurtSelect();
+  switchTab('builder');
+  refreshAll();
+  showToast('Suggestion opened in builder');
+}
+
+function saveSuggestion(idx) {
+  const s = state.suggestions[idx];
+  if (!s) return;
+  const name = s.selected.slice(0, 3).map(id => ID[id].name).join(' + ');
+  const all = loadRecipes();
+  const recipe = {
+    id: 'r_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    name,
+    profile: state.profile,
+    plantBased: state.plantBased,
+    restrictions: [...state.restrictions],
+    milk: s.milk,
+    yogurt: s.yogurt,
+    selected: [...s.selected],
+    servings: 1,
+    rating: null,
+    notes: 'From pantry suggestions',
+    savedAt: Date.now(),
+  };
+  all.unshift(recipe);
+  persistRecipes(all);
+  refreshRecipesUI();
+  showToast('Saved <strong>' + escapeHtml(name) + '</strong> to My Recipes');
+}
+
+function renderPantry() {
+  loadPantry();
+  renderPantryGrid();
+}
+
+// ==============================================================
+// WEEKLY MENU
+// ==============================================================
+const WEEKLY_KEY = 'oats-builder-weekly-v1';
+
+function loadWeeklyMenu() {
+  try {
+    const raw = localStorage.getItem(WEEKLY_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+function persistWeeklyMenu(m) {
+  try { localStorage.setItem(WEEKLY_KEY, JSON.stringify(m)); } catch (e) {}
+}
+
+function buildFreshCombo(dayIdx) {
+  const recs = PROFILE_RECOMMENDS[state.profile] || {};
+  const allowed = INGREDIENTS.filter(i => !getProfileBan(i.id));
+  const byCat = {};
+  CATS_ORDER.forEach(c => byCat[c] = allowed.filter(i => i.cat === c));
+
+  const pickN = (arr, n) => {
+    if (!arr.length) return [];
+    const recPool = arr.filter(i => recs[i.id]);
+    const usePool = (recPool.length && Math.random() < 0.7) ? recPool : arr;
+    const copy = [...usePool];
+    const out = [];
+    while (out.length < n && copy.length) {
+      out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]);
+    }
+    return out;
+  };
+
+  const chosen = [
+    ...pickN(byCat['Fruit'] || [], 1 + Math.floor(Math.random() * 2)),
+    ...pickN(byCat['Nuts'] || [], 1),
+    ...pickN(byCat['Seeds'] || [], 1),
+    ...(Math.random() < 0.7 ? pickN(byCat['Butters & fats'] || [], 1) : []),
+    ...(Math.random() < 0.4 ? pickN(byCat['Sweeteners'] || [], 1) : []),
+    ...(Math.random() < 0.5 ? pickN(byCat['Extras & superfoods'] || [], 1) : []),
+    ...pickN(byCat['Spices & powders'] || [], 1),
+  ];
+
+  const final = [];
+  chosen.forEach(c => {
+    const conflict = final.some(f => (clashMap[f.id] || new Set()).has(c.id));
+    if (!conflict) final.push(c);
+  });
+
+  let milk = state.milk;
+  if (milk === 'none' || !isMilkAllowed(milk)) {
+    milk = state.plantBased ? 'oat' : 'full_fat';
+    if (!isMilkAllowed(milk)) milk = 'none';
+  }
+  let yog = state.yogurt;
+  if (yog === 'none' || !isYogurtAllowed(yog)) {
+    yog = state.plantBased ? 'soy_yog' : 'greek_full';
+    if (!isYogurtAllowed(yog)) yog = 'none';
+  }
+
+  const name = final.slice(0, 3).map(c => c.name).join(' + ') || 'Plain base';
+
+  return {
+    dayLabel: 'Day ' + (dayIdx + 1),
+    source: 'fresh',
+    recipeId: null,
+    name,
+    milk,
+    yogurt: yog,
+    selected: final.map(c => c.id),
+  };
+}
+
+function generateWeeklyMenu() {
+  const profile = state.profile;
+  const all = loadRecipes()
+    .filter(r => r.profile === profile && (r.rating === 'loved' || r.rating === 'fine'));
+  const order = { loved: 0, fine: 1 };
+  all.sort((a, b) => {
+    const oa = order[a.rating], ob = order[b.rating];
+    if (oa !== ob) return oa - ob;
+    return b.savedAt - a.savedAt;
+  });
+
+  const days = [];
+  const saved = all.slice(0, 7);
+  saved.forEach((r, i) => {
+    days.push({
+      dayLabel: 'Day ' + (i+1),
+      source: 'saved',
+      recipeId: r.id,
+      name: r.name,
+      milk: r.milk || 'none',
+      yogurt: r.yogurt || 'none',
+      selected: r.selected || [],
+      rating: r.rating,
+    });
+  });
+
+  while (days.length < 7) {
+    days.push(buildFreshCombo(days.length));
+  }
+
+  return {
+    generatedAt: Date.now(),
+    profile,
+    plantBased: state.plantBased,
+    restrictions: [...state.restrictions],
+    savedCount: saved.length,
+    freshCount: 7 - saved.length,
+    days,
+  };
+}
+
+function computeMacrosFromDay(d) {
+  const milk = MILK_DATA[d.milk] || MILK_DATA.none;
+  const yog = YOGURT_DATA[d.yogurt] || YOGURT_DATA.none;
+  let totals = [0,0,0,0,0];
+  BASE_FIXED.forEach(b => totals = totals.map((v,i) => v + b.macros[i]));
+  totals = totals.map((v,i) => v + milk.macros[i] + yog.macros[i]);
+  (d.selected || []).forEach(id => {
+    const ing = ID[id];
+    if (ing) totals = totals.map((v,i) => v + ing.macros[i]);
+  });
+  return totals;
+}
+
+function renderWeeklyMenu() {
+  document.getElementById('weekly-profile-label').textContent = PROFILES[state.profile].label;
+
+  const grid = document.getElementById('day-grid');
+  const statusEl = document.getElementById('weekly-status');
+  const shoppingPanel = document.getElementById('shopping-list');
+
+  const menu = loadWeeklyMenu();
+  if (!menu) {
+    grid.innerHTML = '';
+    statusEl.innerHTML = '<div class="weekly-status" style="text-align:center;color:var(--muted);font-style:italic">No menu generated yet. Tap <strong>Generate weekly menu</strong> above.</div>';
+    shoppingPanel.style.display = 'none';
+    return;
+  }
+
+  let banner = '';
+  if (menu.savedCount === 0) {
+    banner = '<div class="weekly-status">Not enough rated recipes yet — all 7 days were generated from <strong>' + PROFILES[menu.profile].label + '</strong> recommendations. Save &amp; rate combos in the Builder to personalise.</div>';
+  } else if (menu.freshCount > 0) {
+    banner = '<div class="weekly-status"><strong>' + menu.savedCount + '</strong> day' + (menu.savedCount>1?'s':'') + ' from your favourites · <strong>' + menu.freshCount + '</strong> generated from <strong>' + PROFILES[menu.profile].label + '</strong> recommendations</div>';
+  } else {
+    banner = '<div class="weekly-status">All 7 days drawn from your top-rated <strong>' + PROFILES[menu.profile].label + '</strong> recipes</div>';
+  }
+  statusEl.innerHTML = banner;
+
+  grid.innerHTML = '';
+  menu.days.forEach(d => {
+    const ings = (d.selected || []).slice(0, 4).map(id => (ID[id] && ID[id].name) || '').filter(Boolean).join(', ');
+    const more = (d.selected || []).length > 4 ? '…' : '';
+    const macros = computeMacrosFromDay(d);
+    const card = document.createElement('button');
+    card.className = 'day-card';
+    card.innerHTML =
+      '<div class="day">' + escapeHtml(d.dayLabel) + '</div>' +
+      '<div class="name">' + escapeHtml(d.name) + '</div>' +
+      '<div class="ings">' + escapeHtml(ings || '(base only)') + more + '</div>' +
+      '<div class="badge-row">' +
+        '<span class="' + (d.source === 'saved' ? 'src-saved' : 'src-fresh') + '">' + (d.source === 'saved' ? '★ saved' : '✦ fresh') + '</span>' +
+        '<span class="macros-mini">· ' + Math.round(macros[0]) + ' kcal · ' + Math.round(macros[1]) + 'g protein</span>' +
+      '</div>';
+    card.addEventListener('click', () => loadDayIntoBuilder(d));
+    grid.appendChild(card);
+  });
+
+  renderShoppingList(menu);
+  shoppingPanel.style.display = '';
+}
+
+function renderShoppingList(menu) {
+  const root = document.getElementById('shopping-content');
+  root.innerHTML = '';
+
+  const counts = {};
+  let oatsCount = 0;
+  const milkCount = {};
+  const yogCount = {};
+  menu.days.forEach(d => {
+    oatsCount++;
+    if (d.milk && d.milk !== 'none') milkCount[d.milk] = (milkCount[d.milk] || 0) + 1;
+    if (d.yogurt && d.yogurt !== 'none') yogCount[d.yogurt] = (yogCount[d.yogurt] || 0) + 1;
+    (d.selected || []).forEach(id => {
+      counts[id] = (counts[id] || 0) + 1;
+    });
+  });
+
+  const baseGroup = document.createElement('div');
+  baseGroup.className = 'group';
+  baseGroup.innerHTML = '<h3>Base &amp; liquid</h3>';
+  const baseUL = document.createElement('ul');
+  if (oatsCount > 0) {
+    const li = document.createElement('li');
+    const totalCups = (oatsCount * 0.5);
+    li.innerHTML = 'Rolled oats <span class="count">~' + totalCups + ' cups (½ cup × ' + oatsCount + ')</span>';
+    baseUL.appendChild(li);
+  }
+  Object.entries(milkCount).forEach(([k, n]) => {
+    const totalCups = (n * 2/3).toFixed(1).replace(/\.0$/, '');
+    const li = document.createElement('li');
+    li.innerHTML = MILK_DATA[k].short + ' milk <span class="count">~' + totalCups + ' cups (⅔ × ' + n + ')</span>';
+    baseUL.appendChild(li);
+  });
+  Object.entries(yogCount).forEach(([k, n]) => {
+    const totalCups = (n * 0.25).toFixed(2).replace(/\.?0+$/, '');
+    const li = document.createElement('li');
+    li.innerHTML = YOGURT_DATA[k].short + ' <span class="count">~' + totalCups + ' cups (¼ × ' + n + ')</span>';
+    baseUL.appendChild(li);
+  });
+  baseGroup.appendChild(baseUL);
+  root.appendChild(baseGroup);
+
+  CATS_ORDER.forEach(cat => {
+    const itemsInCat = INGREDIENTS.filter(i => i.cat === cat && counts[i.id]);
+    if (!itemsInCat.length) return;
+    const group = document.createElement('div');
+    group.className = 'group';
+    group.innerHTML = '<h3>' + escapeHtml(cat) + '</h3>';
+    const ul = document.createElement('ul');
+    itemsInCat.forEach(ing => {
+      const li = document.createElement('li');
+      const n = counts[ing.id];
+      li.innerHTML = escapeHtml(ing.name) + ' <span class="count">× ' + n + ' day' + (n>1?'s':'') + ' (' + escapeHtml(qty(ing.qty)) + ' each)</span>';
+      ul.appendChild(li);
+    });
+    group.appendChild(ul);
+    root.appendChild(group);
+  });
+}
+
+function loadDayIntoBuilder(d) {
+  state.milk = d.milk || 'none';
+  state.yogurt = d.yogurt || 'none';
+  state.selected = new Set(d.selected || []);
+  renderMilkSelect();
+  renderYogurtSelect();
+  switchTab('builder');
+  refreshAll();
+  showToast('Opened <strong>' + escapeHtml(d.name) + '</strong> in the builder');
+}
+
+// ----- Tabs -----
+function switchTab(name) {
+  document.body.dataset.activeTab = name;
+  document.querySelectorAll('.tab-nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+  if (name === 'recipes') renderRecipesList();
+  if (name === 'weekly')  renderWeeklyMenu();
+  if (name === 'inspiration') renderInspiration();
+  if (name === 'pantry') renderPantry();
+  if (name === 'shopping') renderShoppingTab();
+}
+document.querySelectorAll('.tab-nav button').forEach(b => {
+  b.addEventListener('click', () => switchTab(b.dataset.tab));
+});
+
+document.getElementById('recipes-sort').addEventListener('change', (e) => {
+  state.recipesSort = e.target.value;
+  renderRecipesList();
+});
+
+document.getElementById('save-btn').addEventListener('click', saveCurrentRecipe);
+
+document.getElementById('add-to-shop-btn').addEventListener('click', () => {
+  const added = addRecipeToShopping(state.milk, state.yogurt, [...state.selected], 'builder');
+  showToast(added > 0 ? 'Added <strong>' + added + '</strong> item' + (added===1?'':'s') + ' to Shopping' : 'Already on your list');
+});
+
+
+
+const shopSyncBtn = document.getElementById('shop-sync-week-btn');
+if (shopSyncBtn) shopSyncBtn.addEventListener('click', () => {
+  const added = syncShoppingFromWeekly();
+  if (added > 0) showToast('Added <strong>' + added + '</strong> new item' + (added===1?'':'s') + ' from Weekly Menu');
+  else showToast('No new items — list already in sync');
+  renderShoppingTab();
+});
+
+const shopClearTickedBtn = document.getElementById('shop-clear-ticked-btn');
+if (shopClearTickedBtn) shopClearTickedBtn.addEventListener('click', () => {
+  state.shopping = state.shopping.filter(it => !it.ticked);
+  persistShopping();
+  renderShoppingTab();
+  showToast('Ticked items cleared');
+});
+
+const shopClearAllBtn = document.getElementById('shop-clear-all-btn');
+if (shopClearAllBtn) shopClearAllBtn.addEventListener('click', () => {
+  if (!state.shopping.length) return;
+  openConfirmModal('Clear the entire shopping list?', () => {
+    state.shopping = [];
+    persistShopping();
+    renderShoppingTab();
+    showToast('Shopping list cleared');
+  });
+});
+
+loadShopping();
+updateShoppingCount();
+
+const pantryClearBtn = document.getElementById('pantry-clear-btn');
+if (pantryClearBtn) pantryClearBtn.addEventListener('click', () => {
+  if (!state.pantry.size) return;
+  openConfirmModal('Clear all pantry items?', () => {
+    state.pantry.clear();
+    persistPantry();
+    renderPantryGrid();
+    document.getElementById('suggestion-output').innerHTML = '';
+    showToast('Pantry cleared');
+  });
+});
+const pantrySuggestBtn = document.getElementById('pantry-suggest-btn');
+if (pantrySuggestBtn) pantrySuggestBtn.addEventListener('click', generateSuggestions);
+
+const recipesResetBtn = document.getElementById('recipes-reset-btn');
+if (recipesResetBtn) recipesResetBtn.addEventListener('click', () => {
+  openConfirmModal('Delete ALL saved recipes? This cannot be undone.', () => {
+    persistRecipes([]);
+    refreshRecipesUI();
+    showToast('All saved recipes cleared');
+  });
+});
+
+const weeklyResetBtn = document.getElementById('weekly-reset-btn');
+if (weeklyResetBtn) weeklyResetBtn.addEventListener('click', () => {
+  openConfirmModal('Clear the current weekly menu?', () => {
+    try { localStorage.removeItem(WEEKLY_KEY); } catch (e) {}
+    renderWeeklyMenu();
+    showToast('Weekly menu cleared');
+  });
+});
+
+document.getElementById('generate-week-btn').addEventListener('click', () => {
+  const menu = generateWeeklyMenu();
+  persistWeeklyMenu(menu);
+  renderWeeklyMenu();
+  // Auto-sync shopping list with new menu
+  syncShoppingFromWeekly();
+  updateShoppingCount();
+  showToast('Weekly menu generated · <strong>' + menu.savedCount + '</strong> saved + <strong>' + menu.freshCount + '</strong> fresh · shopping list updated');
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (!state.selected.size) return;
+  state.selected.clear();
+  refreshAll();
+  showToast('Toppings cleared');
+});
+
+document.getElementById('surprise-btn').addEventListener('click', surpriseMe);
+
+document.getElementById('srv-minus').addEventListener('click', () => {
+  if (state.servings > 1) { state.servings--; refreshMacroBar(); }
+});
+document.getElementById('srv-plus').addEventListener('click', () => {
+  if (state.servings < 4) { state.servings++; refreshMacroBar(); }
+});
+
+function surpriseMe() {
+  const allowed = INGREDIENTS.filter(i => !getProfileBan(i.id));
+  const byCat = {};
+  CATS_ORDER.forEach(c => byCat[c] = allowed.filter(i => i.cat === c));
+
+  const pickN = (arr, n) => {
+    const copy = [...arr];
+    const out = [];
+    while (out.length < n && copy.length) {
+      out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]);
+    }
+    return out;
+  };
+
+  const chosen = [
+    ...pickN(byCat['Fruit'] || [], 1 + Math.floor(Math.random() * 2)),
+    ...pickN(byCat['Nuts'] || [], 1),
+    ...pickN(byCat['Seeds'] || [], 1),
+    ...pickN(byCat['Butters & fats'] || [], 1),
+    ...(Math.random() < 0.4 ? pickN(byCat['Sweeteners'] || [], 1) : []),
+    ...(Math.random() < 0.5 ? pickN(byCat['Extras & superfoods'] || [], 1) : []),
+    ...pickN(byCat['Spices & powders'] || [], 1),
+    ...(Math.random() < 0.3 ? pickN(byCat['Protein & dairy'] || [], 1) : []),
+  ];
+
+  if (state.mode === 'best') {
+    const final = [];
+    chosen.forEach(c => {
+      const conflict = final.some(f => (clashMap[f.id] || new Set()).has(c.id));
+      if (!conflict) final.push(c);
+    });
+    state.selected = new Set(final.map(c => c.id));
+  } else {
+    state.selected = new Set(chosen.map(c => c.id));
+  }
+  refreshAll();
+  showToast('Surprise — ' + state.selected.size + ' toppings picked. Tap <strong>Generate</strong> for the recipe.');
+}
+
+
+['units-imp', 'units-met'].forEach(id => {
+  document.getElementById(id).addEventListener('click', (e) => {
+    state.units = e.currentTarget.dataset.units;
+    document.querySelectorAll('[data-units]').forEach(b => {
+      const active = b.dataset.units === state.units;
+      b.style.background = active ? 'var(--card)' : 'transparent';
+      b.style.color = active ? 'var(--text)' : 'var(--muted)';
+      b.style.fontWeight = active ? '600' : '500';
+      b.style.boxShadow = active ? '0 1px 2px rgba(0,0,0,0.08)' : 'none';
+    });
+    try { localStorage.setItem('oats-builder-units', state.units); } catch (e) {}
+    // Re-render whatever uses qty
+    refreshBenefitsPanel();
+    refreshChipStates();
+    renderShoppingTab();
+    if (document.body.dataset.activeTab === 'inspiration') renderInspiration();
+    if (document.body.dataset.activeTab === 'pantry') renderPantryGrid();
+    if (document.body.dataset.activeTab === 'recipes') renderRecipesList();
+    if (document.body.dataset.activeTab === 'weekly') renderWeeklyMenu();
+  });
+});
+// Restore saved unit pref
+try {
+  const u = localStorage.getItem('oats-builder-units');
+  if (u === 'metric') {
+    state.units = 'metric';
+    document.getElementById('units-met').click();
+  }
+} catch (e) {}
+
+// ----- Theme toggle -----
+const THEME_KEY = 'oats-builder-theme';
+function applyTheme(t) {
+  if (t === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('theme-btn').textContent = '🌙';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.getElementById('theme-btn').textContent = '☀';
+  }
+}
+document.getElementById('theme-btn').addEventListener('click', () => {
+  const cur = localStorage.getItem(THEME_KEY) || 'dark';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  applyTheme(next);
+});
+applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+
+
+// ----- Welcome modal (first visit only) -----
+const WELCOME_KEY = 'oats-builder-welcome-seen-v1';
+function showWelcome() {
+  const modal = document.getElementById('welcome-modal');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+function dismissWelcome() {
+  const modal = document.getElementById('welcome-modal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  try { localStorage.setItem(WELCOME_KEY, '1'); } catch (e) {}
+}
+document.getElementById('welcome-ok').addEventListener('click', dismissWelcome);
+document.getElementById('welcome-close').addEventListener('click', dismissWelcome);
+document.getElementById('welcome-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'welcome-modal') dismissWelcome();
+});
+
+// Show on first visit
+try {
+  if (!localStorage.getItem(WELCOME_KEY)) {
+    setTimeout(showWelcome, 250);
+  }
+} catch (e) {}
+
+
+// ----- Personal dislikes persistence -----
+const DISLIKES_KEY = 'oats-builder-dislikes-v1';
+function loadDislikes() {
+  try {
+    const raw = localStorage.getItem(DISLIKES_KEY);
+    if (raw) state.dislikes = new Set(JSON.parse(raw));
+  } catch (e) {}
+}
+function persistDislikes() {
+  try { localStorage.setItem(DISLIKES_KEY, JSON.stringify([...state.dislikes])); } catch (e) {}
+}
+loadDislikes();
+
+// ----- Customize modal -----
+function openCustomizeModal() {
+  // Sync controls with current state
+  document.getElementById('cust-profile').value = state.profile;
+  document.getElementById('cust-plant').checked = state.plantBased;
+  document.getElementById('cust-gluten').checked = state.restrictions.has('gluten');
+  document.querySelectorAll('#cust-allergies .restr-chip').forEach(b => {
+    b.classList.toggle('active', state.restrictions.has(b.dataset.restr));
+  });
+  // Build dislikes grid
+  const dGrid = document.getElementById('cust-dislikes-grid');
+  dGrid.innerHTML = '';
+  CATS_ORDER.forEach(cat => {
+    const items = INGREDIENTS.filter(i => i.cat === cat);
+    if (!items.length) return;
+    const section = document.createElement('div');
+    section.className = 'cat';
+    section.innerHTML = '<div class="cat-head"><span class="cat-name">' + escapeHtml(cat) + '</span></div>';
+    const chips = document.createElement('div');
+    chips.className = 'chips';
+    items.forEach(i => {
+      const b = document.createElement('button');
+      b.className = 'chip' + (state.dislikes.has(i.id) ? ' selected' : '');
+      b.textContent = i.name;
+      b.dataset.id = i.id;
+      b.addEventListener('click', () => {
+        if (state.dislikes.has(i.id)) state.dislikes.delete(i.id);
+        else state.dislikes.add(i.id);
+        b.classList.toggle('selected');
+      });
+      chips.appendChild(b);
+    });
+    section.appendChild(chips);
+    dGrid.appendChild(section);
+  });
+  // Wire allergy chips inside customize
+  document.querySelectorAll('#cust-allergies .restr-chip').forEach(b => {
+    b.onclick = () => {
+      const r = b.dataset.restr;
+      if (state.restrictions.has(r)) state.restrictions.delete(r);
+      else state.restrictions.add(r);
+      b.classList.toggle('active', state.restrictions.has(r));
+    };
+  });
+
+  const modal = document.getElementById('customize-modal');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+function closeCustomizeModal() {
+  document.getElementById('customize-modal').classList.remove('open');
+  document.getElementById('customize-modal').setAttribute('aria-hidden', 'true');
+}
+function saveCustomize() {
+  state.profile = document.getElementById('cust-profile').value;
+  state.plantBased = document.getElementById('cust-plant').checked;
+  if (document.getElementById('cust-gluten').checked) state.restrictions.add('gluten');
+  else state.restrictions.delete('gluten');
+  // Sync main UI controls
+  document.getElementById('profile-select').value = state.profile;
+  document.getElementById('plant-based-toggle').checked = state.plantBased;
+  document.getElementById('gluten-free-toggle').checked = state.restrictions.has('gluten');
+  document.querySelectorAll('.profile-bar:not(#cust-allergies) .restr-chip').forEach(b => {
+    b.classList.toggle('active', state.restrictions.has(b.dataset.restr));
+  });
+  // Auto-deselect any toppings now banned
+  const newlyBanned = [...state.selected].filter(id => getProfileBan(id));
+  newlyBanned.forEach(id => state.selected.delete(id));
+  persistDislikes();
+  renderMilkSelect();
+  renderYogurtSelect();
+  refreshAll();
+  closeCustomizeModal();
+  showToast('Preferences saved');
+}
+
+document.getElementById('customize-save').addEventListener('click', saveCustomize);
+document.getElementById('customize-cancel').addEventListener('click', closeCustomizeModal);
+document.getElementById('customize-close').addEventListener('click', closeCustomizeModal);
+document.getElementById('customize-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'customize-modal') closeCustomizeModal();
+});
+
+// Welcome → Customize
+document.getElementById('welcome-customize').addEventListener('click', () => {
+  dismissWelcome();
+  openCustomizeModal();
+});
+
+// ? button → Welcome modal
+document.getElementById('help-btn').addEventListener('click', showWelcome);
+// Customise button → Customize modal directly
+document.getElementById('customize-btn').addEventListener('click', openCustomizeModal);
+
+// Init
+renderMilkSelect();
+renderYogurtSelect();
+renderCategories();
+refreshRecipesUI();
+</script>
+</body>
+</html>
