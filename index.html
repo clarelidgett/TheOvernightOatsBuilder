@@ -641,9 +641,12 @@
   .chip.banned::after { content: "✕"; font-size: 10px; margin-left: 4px; opacity: 0.7; }
 
   .legend {
-    display: flex; flex-wrap: wrap; gap: 14px; font-size: 11px; color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: 16px 22px; font-size: 14px; font-weight: 600;
+    color: var(--text);
     margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);
   }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .star, .legend .heart, .legend .ban { font-size: 16px; }
   .legend span { display: inline-flex; align-items: center; gap: 5px; }
   .legend .heart { color: var(--accent); }
   .legend .star { color: var(--gold); }
@@ -930,6 +933,7 @@
       <button class="restr-chip" data-restr="nuts" title="Bans all tree nuts and peanut butter">Nuts</button>
       <button class="restr-chip" data-restr="sesame">Sesame</button>
       <button class="restr-chip" data-restr="soy">Soy</button>
+      <button class="restr-chip" data-restr="lactose" title="Bans dairy milks and yogurts (but allows honey, eggs, etc.)">Lactose</button>
     </div>
   </div>
 
@@ -1001,7 +1005,7 @@
             <button id="reset-btn" style="border:0; background:transparent; color:var(--muted); font-family:inherit; font-size:12px; cursor:pointer; padding:5px 8px; border-radius:6px;">Reset toppings</button>
           </div>
         </div>
-        <div class="legend" style="margin-top:0; padding-top:0; border-top:0; margin-bottom:14px;">
+        <div class="legend" style="margin-top:0; padding-top:0; border-top:0; margin-bottom:18px;">
           <span><span class="star">★</span> recommended for your profile</span>
           <span><span class="heart">♥</span> signature pairing</span>
           <span><span class="ban">✕</span> not recommended for your profile</span>
@@ -1026,6 +1030,8 @@
 
   <div class="disclaimer">
     <strong>⚠ General nutrition guidance only — not medical advice.</strong> Profile recommendations and exclusions are based on mainstream nutrition principles. If you are pregnant, breastfeeding, managing diabetes or any medical condition, or taking medication, please consult your healthcare provider before changing your diet. This tool does not diagnose, treat, prevent, or cure any condition.
+    <br><br>
+    <strong>Macro sources.</strong> Calorie and macronutrient values (kcal, protein, fat, carbs, fibre) are approximations sourced from <em>USDA FoodData Central</em> (US gold-standard food composition database), <em>McCance &amp; Widdowson</em> (UK food composition database), and manufacturer label averages for branded categories (protein powders, plant milks, branded yogurts). Values are cross-referenced for typical portion sizes. Actual brand-specific values may vary by ±20%.
   </div>
 
   </div><!-- /#tab-builder -->
@@ -1198,6 +1204,7 @@
       <button class="restr-chip" data-restr="nuts">Nuts</button>
       <button class="restr-chip" data-restr="sesame">Sesame</button>
       <button class="restr-chip" data-restr="soy">Soy</button>
+      <button class="restr-chip" data-restr="lactose" title="Bans dairy milks and yogurts (but allows honey, eggs, etc.)">Lactose</button>
     </div>
 
     <h4>Personal dislikes <span style="font-size:11px; font-weight:400; color:var(--muted); text-transform:none; letter-spacing:0;">— tap any ingredient you don't like, it'll be hidden from your suggestions</span></h4>
@@ -1235,7 +1242,7 @@
     <ul class="ing" id="rc-benefits" style="columns: 1; column-gap: 0;"></ul>
     <h4>Estimated macros</h4>
     <div class="macros" id="rc-macros"></div>
-    <p style="font-size: 11px; color: var(--muted); margin: 8px 0 0;">Approximations from standard food composition data; will vary by brand.</p>
+    <p style="font-size: 11px; color: var(--muted); margin: 8px 0 0;">Macros are approximations from USDA FoodData Central, McCance &amp; Widdowson, and manufacturer averages. Brand-specific values may vary ±20%.</p>
     <div class="row">
       <button class="btn ghost" id="copy-btn">Copy as text</button>
       <button class="btn ghost" id="print-btn">Print</button>
@@ -1281,6 +1288,7 @@ const INGREDIENTS = [
   { id:'pistachios',     name:'Pistachios',       cat:'Nuts',            qty:'1 tbsp, chopped',   macros:[45,1.7,3.6,2.2,0.8],  benefit:'Complete protein and lutein for eye health; lowest cal-per-nut' },
   { id:'macadamia',      name:'Macadamia',        cat:'Nuts',            qty:'1 tbsp, chopped',   macros:[60,0.6,6.4,1.2,0.6],  benefit:'Highest monounsaturated-fat ratio; deeply satiating' },
   { id:'hazelnuts',      name:'Hazelnuts',        cat:'Nuts',            qty:'1 tbsp, chopped',   macros:[50,1.2,4.8,1.4,0.7],  benefit:'Vitamin E, folate and manganese — cardiovascular support' },
+  { id:'brazil_nuts',    name:'Brazil nuts',       cat:'Nuts',            qty:'1 tbsp, chopped (~2-3 nuts)', macros:[60,1.3,6,1.1,0.7],  benefit:'Highest natural source of selenium — supports thyroid and antioxidant defence (2–3 nuts/day is plenty)' },
 
   { id:'chia',           name:'Chia seeds',       cat:'Seeds',           qty:'1 tbsp',            macros:[60,2,4,5,4],          benefit:'Soluble fibre and ALA omega-3; gels overnight to thicken the oats' },
   { id:'flax',           name:'Flaxseed (ground)',cat:'Seeds',           qty:'1 tsp',             macros:[12,0.5,1,0.6,0.6],    benefit:'Lignans and ALA omega-3 — hormonal balance and gut health' },
@@ -1421,6 +1429,7 @@ const ALLERGY_BANS = {
       pistachios:     'Tree nut',
       macadamia:      'Tree nut',
       hazelnuts:      'Tree nut',
+      brazil_nuts:    'Tree nut',
       almond_butter:  'Tree nut (almond)',
       cashew_butter:  'Tree nut (cashew)',
       peanut_butter:  'Peanut',
@@ -1438,6 +1447,13 @@ const ALLERGY_BANS = {
     label: 'Gluten-free',
     items: { granola: 'Most granola contains gluten unless certified GF' },
   },
+  lactose: {
+    label: 'Lactose intolerance',
+    items: {
+      extra_yogurt:   'Contains lactose (dairy)',
+      cottage_cheese: 'Contains lactose (dairy)',
+    },
+  },
 };
 
 // Recommended ingredients per profile (with reason)
@@ -1451,6 +1467,7 @@ const PROFILE_RECOMMENDS = {
     hemp:         'Complete protein with omega-3',
     cardamom:     'Eases bloating common in menopause',
     almonds:      'Vitamin E and calcium support',
+    brazil_nuts:  'Selenium for thyroid support during hormonal shifts',
   },
   perimenopausal: {
     pumpkin:         'Magnesium for sleep and mood; iron for menstrual losses',
@@ -1530,6 +1547,7 @@ const PROFILE_RECOMMENDS = {
     greek_full:      'Calcium, vitamin D, full fat for fat-soluble vitamins',
     dark_chocolate:  'Polyphenols for cardiovascular and cognitive health',
     cinnamon:        'Anti-inflammatory and circulation',
+    brazil_nuts:     'Selenium for cognitive and antioxidant defence',
   },
   bloodsugar: {
     cottage_cheese: 'Slow-release casein, no sugar',
@@ -1557,6 +1575,7 @@ const PROFILE_RECOMMENDS = {
     dark_chocolate:  '70%+ cocoa for polyphenols',
     hemp:            'Balanced omega-3:6 ratio',
     almond_butter:   'Vitamin E, anti-inflammatory fats',
+    brazil_nuts:     'Selenium is a key antioxidant for reducing oxidative stress',
   },
 };
 
@@ -1636,6 +1655,7 @@ const CATS_ORDER = ['Fruit','Nuts','Seeds','Protein & dairy','Butters & fats','S
 function isMilkAllowed(k) {
   const v = MILK_DATA[k];
   if (state.plantBased && !v.plant) return false;
+  if (state.restrictions.has('lactose') && !v.plant) return false;
   if (state.restrictions.has('nuts') && k === 'almond') return false;
   if (state.restrictions.has('soy') && k === 'soy') return false;
   return true;
@@ -1643,6 +1663,7 @@ function isMilkAllowed(k) {
 function isYogurtAllowed(k) {
   const v = YOGURT_DATA[k];
   if (state.plantBased && !v.plant) return false;
+  if (state.restrictions.has('lactose') && !v.plant) return false;
   if (state.restrictions.has('soy') && k === 'soy_yog') return false;
   return true;
 }
