@@ -1248,6 +1248,7 @@
       <button class="btn ghost" id="print-btn">Print</button>
       <button class="btn ghost" id="save-btn">Save to My Recipes</button>
       <button class="btn ghost" id="add-to-shop-btn">+ Shopping list</button>
+      <button class="btn ghost" id="open-builder-btn">Open in builder</button>
       <button class="btn" id="done-btn">Done</button>
     </div>
   </div>
@@ -1629,6 +1630,7 @@ const state = {
   recipesFilter: 'all',
   units: 'imperial',
   dislikes: new Set(),
+  recipeCardSource: 'builder',
 };
 
 // Profile macro targets (per serving). Only protein and fibre are tracked as "min met";
@@ -2042,7 +2044,8 @@ function findClashPairs() {
   return pairs;
 }
 
-function generateRecipe() {
+function generateRecipe(source) {
+  state.recipeCardSource = source || 'builder';
   const milk = MILK_DATA[state.milk];
   const yog = YOGURT_DATA[state.yogurt];
   const baseList = [...BASE_FIXED.map(b => ({ name: b.name, qty: b.qty, macros: b.macros }))];
@@ -2145,13 +2148,23 @@ function generateRecipe() {
     notes.appendChild(div);
   }
 
+  // Show 'Open in builder' only when the card was opened from Inspiration or Pantry
+  document.getElementById('open-builder-btn').style.display =
+    (state.recipeCardSource === 'builder') ? 'none' : '';
+
   document.getElementById('modal').classList.add('open');
   document.getElementById('modal').setAttribute('aria-hidden', 'false');
 }
 
-document.getElementById('recipe-btn').addEventListener('click', generateRecipe);
+document.getElementById('recipe-btn').addEventListener('click', () => generateRecipe('builder'));
 document.getElementById('close-modal').addEventListener('click', closeModal);
 document.getElementById('done-btn').addEventListener('click', closeModal);
+document.getElementById('open-builder-btn').addEventListener('click', () => {
+  closeModal();
+  switchTab('builder');
+  refreshAll();
+  showToast('Loaded into the builder — tweak and regenerate');
+});
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
   document.getElementById('modal').setAttribute('aria-hidden', 'true');
@@ -2882,15 +2895,15 @@ function renderInspiration() {
       '<div class="ings">' + ingsHtml + '</div>' +
       (r.note ? '<div class="note">' + escapeHtml(r.note) + '</div>' : '') +
       '<div class="row">' +
-        '<button class="primary" data-action="open" data-id="' + r.id + '">Open in builder</button>' +
+        '<button class="primary" data-action="recipe" data-id="' + r.id + '">Recipe card</button>' +
         '<button data-action="save" data-id="' + r.id + '">Save</button>' +
         '<button data-action="shop" data-id="' + r.id + '">+ Shop</button>' +
       '</div>';
     grid.appendChild(card);
   });
 
-  grid.querySelectorAll('[data-action="open"]').forEach(b => {
-    b.addEventListener('click', () => openInspiration(b.dataset.id));
+  grid.querySelectorAll('[data-action="recipe"]').forEach(b => {
+    b.addEventListener('click', () => showInspirationRecipeCard(b.dataset.id));
   });
   grid.querySelectorAll('[data-action="save"]').forEach(b => {
     b.addEventListener('click', () => saveInspiration(b.dataset.id));
@@ -2905,7 +2918,7 @@ function renderInspiration() {
   });
 }
 
-function openInspiration(id) {
+function showInspirationRecipeCard(id) {
   const r = INSPIRATION.find(x => x.id === id);
   if (!r) return;
   state.milk = r.milk || 'none';
@@ -2913,9 +2926,8 @@ function openInspiration(id) {
   state.selected = new Set(r.selected || []);
   renderMilkSelect();
   renderYogurtSelect();
-  switchTab('builder');
   refreshAll();
-  showToast('Opened <strong>' + escapeHtml(r.name) + '</strong> in the builder');
+  generateRecipe('inspiration');
 }
 
 function saveInspiration(id) {
@@ -3295,7 +3307,7 @@ function generateSuggestions() {
       '<div class="ings">' + escapeHtml(ings) + '</div>' +
       '<div class="macros">' + Math.round(totals[0]) + ' kcal · ' + Math.round(totals[1]) + 'g protein</div>' +
       '<div class="row">' +
-        '<button class="primary" data-action="open" data-idx="' + i + '">Open in builder</button>' +
+        '<button class="primary" data-action="recipe" data-idx="' + i + '">Recipe card</button>' +
         '<button data-action="save" data-idx="' + i + '">Save</button>' +
       '</div>';
     grid.appendChild(card);
@@ -3305,15 +3317,15 @@ function generateSuggestions() {
   // Stash for handlers
   state.suggestions = combos.map(ids => ({ selected: ids, milk: defaultMilk, yogurt: defaultYog }));
 
-  out.querySelectorAll('[data-action="open"]').forEach(b => {
-    b.addEventListener('click', () => openSuggestion(parseInt(b.dataset.idx, 10)));
+  out.querySelectorAll('[data-action="recipe"]').forEach(b => {
+    b.addEventListener('click', () => showSuggestionRecipeCard(parseInt(b.dataset.idx, 10)));
   });
   out.querySelectorAll('[data-action="save"]').forEach(b => {
     b.addEventListener('click', () => saveSuggestion(parseInt(b.dataset.idx, 10)));
   });
 }
 
-function openSuggestion(idx) {
+function showSuggestionRecipeCard(idx) {
   const s = state.suggestions[idx];
   if (!s) return;
   state.milk = s.milk;
@@ -3321,9 +3333,8 @@ function openSuggestion(idx) {
   state.selected = new Set(s.selected);
   renderMilkSelect();
   renderYogurtSelect();
-  switchTab('builder');
   refreshAll();
-  showToast('Suggestion opened in builder');
+  generateRecipe('pantry');
 }
 
 function saveSuggestion(idx) {
